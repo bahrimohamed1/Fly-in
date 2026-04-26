@@ -7,7 +7,7 @@ from graph import Graph
 from parser import parse_map
 from renderer import render_debug_map, render_turn
 from router import plan_all_routes
-from simulator import Drone, Simulator, _process_turn
+from simulator import MAX_TURNS, Drone, Simulator, _process_turn
 
 
 def _build_drone_positions(
@@ -40,9 +40,6 @@ def _run_visual(
     Unlike the plain run path, this version steps turn-by-turn so it can
     show per-turn map state when ``--debug`` is active.
     """
-    from graph import ZoneType  # noqa: F401 (used via Drone import chain)
-    from simulator import MAX_TURNS, _compute_occupancy  # noqa: F401
-
     start = graph.start_zone
     drones: list[Drone] = []
     for i in range(1, nb_drones + 1):

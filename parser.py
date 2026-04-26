@@ -76,12 +76,16 @@ def _find_connection_zones(
     defined_zones: set[str],
     line_num: int,
 ) -> tuple[str, str]:
-    """Split 'a-b' into zone names, handling underscores in names."""
-    parts = conn_str.split("-")
-    # Try every split point to find two known zone names
-    for i in range(1, len(parts)):
-        candidate_a = "-".join(parts[:i])
-        candidate_b = "-".join(parts[i:])
+    """Split 'zone_a-zone_b' into two known zone names.
+
+    Zone names cannot contain dashes, so the separator is the unique dash
+    that divides two valid, already-defined zone names.
+    """
+    # Collect all dash positions and test each as the split point once.
+    indices = [i for i, ch in enumerate(conn_str) if ch == "-"]
+    for idx in indices:
+        candidate_a = conn_str[:idx]
+        candidate_b = conn_str[idx + 1:]
         if candidate_a in defined_zones and candidate_b in defined_zones:
             return candidate_a, candidate_b
     _error(
