@@ -8,3 +8,23 @@ class Connection:
         self.zone2: Zone = zone2
         self.max_link_capacity: int = max_link_capacity
         self.current_drones_using: int = 0
+
+    def can_drone_traverse(self) -> bool:
+        return self.current_drones_using < self.max_link_capacity
+
+    def add_drone(self) -> bool:
+        if self.can_drone_traverse():
+            self.current_drones_using += 1
+            return True
+
+        return False
+
+    def remove_drone(self) -> bool:
+        if self.current_drones_using >= 1:
+            self.current_drones_using -= 1
+            return True
+
+        return False
+    
+    def connects(self, zone_a: Zone, zone_b: Zone) -> bool:
+        return (zone_a is self.zone1 and zone_b is self.zone2)
