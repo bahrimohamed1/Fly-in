@@ -1,9 +1,10 @@
-from src.zone import Zone
+from src import Zone, Connection
 
-hub = Zone("hub", 0, 0, "normal")  # max_drones=1, current=0
-print(hub.can_drone_enter())  # True
-print(hub.add_drone())  # Should return: True
-print(hub.current_drones_count)  # Should be: 1
-print(hub.can_drone_enter())  # Should be: False (now 1/1)
-print(hub.add_drone())  # Should return: False (can't add, full!)
-print(hub.current_drones_count)  # Should still be: 1
+hub = Zone("hub", 0, 0, "normal")
+roof1 = Zone("roof1", 3, 4, "normal")
+
+road = Connection(hub, roof1, 2)
+print(road.zone1.name)  # Should print: hub
+print(road.zone2.name)  # Should print: roof1
+print(road.max_link_capacity)  # Should print: 2
+print(road.current_drones_using)  # Should print: 0

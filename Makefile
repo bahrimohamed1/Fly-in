@@ -10,9 +10,9 @@ debug:
 	python3 -m pdb main.py $(MAP)
 
 clean:
-	rm -rf __pycache__
+	rm -rf __pycache__ src/__pycache__
 	rm -rf env .venv
-	rm -rf .mypy_cache
+	rm -rf .mypy_cache src/.mypy_cache
 
 lint:
 	flake8 .

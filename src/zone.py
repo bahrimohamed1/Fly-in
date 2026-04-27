@@ -9,7 +9,7 @@ class Zone:
         self.current_drones_count: int = 0
 
     def can_drone_enter(self) -> bool:
-        return self.max_drones < self.current_drones_count
+        return self.current_drones_count < self.max_drones
 
     def add_drone(self) -> bool:
         if self.can_drone_enter():
