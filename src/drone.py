@@ -9,9 +9,11 @@ class Drone:
 
     def move_to(self, new_zone: Zone) -> bool:
         if new_zone.add_drone():
+            self.current_zone.remove_drone()
+            self.current_zone = new_zone
             return True
 
         return False
 
     def get_position(self) -> Tuple[int, int]:
-        return tuple(self.current_zone.x, self.current_zone.y)
+        return (self.current_zone.x, self.current_zone.y)
