@@ -25,6 +25,6 @@ class Connection:
             return True
 
         return False
-    
+
     def connects(self, zone_a: Zone, zone_b: Zone) -> bool:
         return (zone_a is self.zone1 and zone_b is self.zone2)
