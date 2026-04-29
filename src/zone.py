@@ -1,12 +1,14 @@
+from typing import Optional
+
 class Zone:
     def __init__(self, name: str, x: int, y: int,
-                 zone_type: str, max_drones: int, color: int | None) -> None:
+                 zone_type: str, max_drones: int, color: Optional[int]) -> None:
         self.name: str = name
         self.x: int = x
         self.y: int = y
         self.zone_type: str = zone_type
         self.max_drones: int = max_drones
-        self.color: int | None = color
+        self.color: Optional[int] = color
         self.current_drones_count: int = 0
 
     def can_drone_enter(self) -> bool:
@@ -27,4 +29,5 @@ class Zone:
         return False
     
     def __str__(self):
-        return f"name: {self.name}, x,y: ({self.x}, {self.y}), metadata: [{self.zone_type}, {self.color}, {self.max_drones}]"
+        return f"name: {self.name}, x,y: ({self.x}, {self.y}), metadata: " +\
+            f"[{self.zone_type}, {self.color}, {self.max_drones}]"
