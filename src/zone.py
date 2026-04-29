@@ -25,3 +25,6 @@ class Zone:
             return True
 
         return False
+    
+    def __str__(self):
+        return f"name: {self.name}, x,y: ({self.x}, {self.y}), metadata: [{self.zone_type}, {self.color}, {self.max_drones}]"

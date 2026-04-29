@@ -10,4 +10,5 @@ from src import Zone, Connection, Drone, Parser
 
 parsing = Parser("maps/easy/01_linear_path.txt")
 parsing.parse()
-print(parsing.hubs['start'])
+for drone in parsing.get_drones():
+    print(drone.__str__())

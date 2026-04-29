@@ -11,6 +11,7 @@ class Parser:
         self.end_zone: Zone = None
         self.hubs: Dict[str, Zone] = {}
         self.connections: List[Connection] = []
+        self.drones: List[Drone] = []
         self.valid_zones: List[str] = [
             'normal',
             'priority',
@@ -42,7 +43,7 @@ class Parser:
                             br = info.find('[')
                             if br == -1:
                                 name, x, y = info.split()
-                                metadata = ""
+                                metadata: str = ""
                             else:
                                 name, x, y = info[:br].split()
                                 metadata: str = info[br:].strip('[]')
@@ -86,10 +87,28 @@ class Parser:
                     elif line.startswith("connection"):
                         try:
                             connection = line.split(':', 1)[1].strip()
+                            br = line.find('[')
+                            if br == -1:
+                                zone1, zone2 = connection.split('-')
+                                metadata = ""
+                            else:
+                                connects = connection[:br]
+                                zone1, zone2 = connects.split('-')
+                                metadata = connection[br:-1]
+
+                            metadata_dict = self._parse_metadata(metadata)
+                            self.connections.append(Connection(
+                                zone1,
+                                zone2,
+                                metadata_dict.get('max_link_capacity')
+                            ))
 
                         except Exception as e:
                             print(f"ERROR on line {i}: {e}")
                             sys.exit(1)
+                            
+                for i in range(self.nb_drones):                            
+                    self.drones.append(Drone(i, self.start_zone))
         except FileNotFoundError:
             print(f"ERROR: File '{self.file_name}' not found")
             sys.exit(1)
@@ -110,3 +129,16 @@ class Parser:
                     metadata[key] = value
 
         return metadata
+    
+    def get_number_of_drones(self) -> int:
+        return self.nb_drones
+    def get_start_zone(self) -> Zone:
+        return self.start_zone
+    def get_end_zone(self) -> Zone:
+        return self.end_zone
+    def get_zones(self) -> Dict[str, Any]:
+        return self.hubs
+    def get_connections(self) -> List[Connection]:
+        return self.connections
+    def get_drones(self) -> List[Drone]:
+        return self.drones

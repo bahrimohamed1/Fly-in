@@ -17,3 +17,6 @@ class Drone:
 
     def get_position(self) -> Tuple[int, int]:
         return (self.current_zone.x, self.current_zone.y)
+    
+    def __str__(self) -> str:
+        return f"id: {self.drone_id}, current_hub: {self.current_zone.name}"
