@@ -7,8 +7,8 @@ class Parser:
     def __init__(self, file_name: str) -> None:
         self.file_name: str = file_name
         self.nb_drones: int = 0
-        self.start_zone: Zone = None
-        self.end_zone: Zone = None
+        self.start_zone: Zone | None = None
+        self.end_zone: Zone | None = None
         self.hubs: Dict[str, Zone] = {}
         self.connections: List[Connection] = []
         self.drones: List[Drone] = []
@@ -88,10 +88,15 @@ class Parser:
                                 zone1, zone2 = connects.split('-')
                                 metadata = connection[br:-1]
 
+                            zone1_obj = self.hubs.get(zone1)
+                            zone2_obj = self.hubs.get(zone2)
+                            if zone1_obj is None or zone2_obj is None:
+                                raise ValueError(
+                                    f"ERROR on line {i}: Zone not found in connection")
                             metadata_dict = self._parse_metadata(metadata)
                             self.connections.append(Connection(
-                                zone1,
-                                zone2,
+                                zone1_obj,
+                                zone2_obj,
                                 metadata_dict.get('max_link_capacity')
                             ))
 
@@ -99,7 +104,7 @@ class Parser:
                             print(f"ERROR on line {i}: {e}")
                             sys.exit(1)
 
-                for i in range(self.nb_drones):
+                for i in range(1, self.nb_drones+1):
                     self.drones.append(Drone(i, self.start_zone))
 
         except FileNotFoundError:
