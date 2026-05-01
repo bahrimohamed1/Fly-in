@@ -10,5 +10,5 @@ from src import Zone, Connection, Drone, Parser
 
 # parsing = Parser("maps/easy/01_linear_path.txt")
 # parsing.parse()
-zone = Zone('start', 0, 0, None, None, None)
-print(Drone(1, zone))
+diiict = {'str': 'hello', 'name': 'simo'}
+print(diiict.get('age'))
