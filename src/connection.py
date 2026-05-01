@@ -28,6 +28,6 @@ class Connection:
 
     def connects(self, zone_a: Zone, zone_b: Zone) -> bool:
         return (zone_a is self.zone1 and zone_b is self.zone2)
-    
+
     def __str__(self) -> str:
         return f"{self.zone1}-{self.zone2}"
