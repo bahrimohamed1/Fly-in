@@ -92,7 +92,8 @@ class Parser:
                             zone2_obj = self.hubs.get(zone2)
                             if zone1_obj is None or zone2_obj is None:
                                 raise ValueError(
-                                    f"ERROR on line {i}: Zone not found in connection")
+                                    f"ERROR on line {i}: "
+                                    "Zone not found in connection")
                             metadata_dict = self._parse_metadata(metadata)
                             self.connections.append(Connection(
                                 zone1_obj,
