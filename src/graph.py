@@ -7,7 +7,7 @@ class Graph:
                  connections: List[Connection]) -> None:
         self.zones: Dict[str, Any] = zones
         self.connections: List[Connection] = connections
-        self.adjacency_list: Dict[str, List[Tuple[Zone, Connection]]] = []
+        self.adjacency_list: Dict[str, List[Tuple[Zone, Connection]]] = {}
         self._build_adjacency_list()
 
     def _build_adjacency_list(self) -> None:
@@ -22,7 +22,7 @@ class Graph:
             self.adjacency_list[zone2.name].append((zone1, connection))
 
     def get_neighbors(self, zone_name: str) -> List[Tuple[Zone, Connection]]:
-        if not self.adjacency_list.get(zone_name):
+        if zone_name not in self.adjacency_list:
             raise KeyError(
                 f"{zone_name} is not accessible in the adjacency list")
 
@@ -60,7 +60,7 @@ class Graph:
             if current in visited:
                 continue
 
-            for neighbor, _ in self.get_neighbors(current):
+            for neighbor, _ in self.get_neighbors(current.name):
                 if neighbor.zone_type != 'blocked' and neighbor not in visited:
                     queue.append(current)
 
