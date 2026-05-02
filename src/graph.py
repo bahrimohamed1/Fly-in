@@ -1,11 +1,12 @@
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List, Tuple
 from . import Connection, Zone
+from collections import deque
 
 
 class Graph:
     def __init__(
         self,
-        zones: Dict[str, Any],
+        zones: Dict[str, Zone],
         connections: List[Connection]
     ) -> None:
         self.zones: Dict[str, Zone] = zones
@@ -36,8 +37,10 @@ class Graph:
 
     def get_connection(self, zone_a: Zone, zone_b: Zone) -> Connection | None:
         for connection in self.connections:
-            if connection.zone1 is zone_a and connection.zone2 is zone_b or \
-                    connection.zone2 is zone_a and connection.zone1 is zone_b:
+            if connection.zone1.name == zone_a.name and \
+                    connection.zone2.name == zone_b.name or \
+                    connection.zone2.name == zone_a.name and \
+                    connection.zone1.name == zone_b.name:
                 return connection
 
         return None
@@ -46,15 +49,15 @@ class Graph:
         if start.zone_type == 'blocked' or end.zone_type == 'blocked':
             return False
 
-        visited: set[Zone] = set()
+        visited: set[str] = set()
 
-        queue: List[Zone] = []
-        queue.append(start)
+        queue: deque[str] = []
+        queue.appendleft(start.name)
 
         while queue:
-            current: Zone = queue.pop()
+            current: str = queue.popleft()
 
-            if current is end:
+            if current == end.name:
                 return True
 
             if current in visited:
@@ -62,8 +65,9 @@ class Graph:
 
             visited.add(current)
 
-            for neighbor, _ in self.get_neighbors(current.name):
-                if neighbor.zone_type != 'blocked' and neighbor not in visited:
-                    queue.append(neighbor)
+            for neighbor, _ in self.get_neighbors(current):
+                if neighbor.zone_type != 'blocked' and \
+                        neighbor.name not in visited:
+                    queue.append(neighbor.name)
 
         return False
