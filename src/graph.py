@@ -60,7 +60,7 @@ class Graph:
             if current in visited:
                 continue
 
-            visited.append(current)
+            visited.add(current)
 
             for neighbor, _ in self.get_neighbors(current.name):
                 if neighbor.zone_type != 'blocked' and neighbor not in visited:
