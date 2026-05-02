@@ -3,9 +3,12 @@ from . import Connection, Zone
 
 
 class Graph:
-    def __init__(self, zones: Dict[str, Any],
-                 connections: List[Connection]) -> None:
-        self.zones: Dict[str, Any] = zones
+    def __init__(
+        self,
+        zones: Dict[str, Any],
+        connections: List[Connection]
+    ) -> None:
+        self.zones: Dict[str, Zone] = zones
         self.connections: List[Connection] = connections
         self.adjacency_list: Dict[str, List[Tuple[Zone, Connection]]] = {}
         self._build_adjacency_list()
@@ -26,7 +29,7 @@ class Graph:
             raise KeyError(
                 f"{zone_name} is not accessible in the adjacency list")
 
-        return self.adjacency_list.get(zone_name)
+        return self.adjacency_list[zone_name]
 
     def get_zone(self, zone_name: str) -> Zone | None:
         return self.zones.get(zone_name)
@@ -39,14 +42,11 @@ class Graph:
 
         return None
 
-    def get_distance(self, from_zone: Zone, to_zone: Zone) -> int:
-        pass
-
     def has_path(self, start: Zone, end: Zone) -> bool:
         if start.zone_type == 'blocked' or end.zone_type == 'blocked':
             return False
 
-        visited: List[Zone] = []
+        visited: set[Zone] = set()
 
         queue: List[Zone] = []
         queue.append(start)
@@ -60,8 +60,10 @@ class Graph:
             if current in visited:
                 continue
 
+            visited.append(current)
+
             for neighbor, _ in self.get_neighbors(current.name):
                 if neighbor.zone_type != 'blocked' and neighbor not in visited:
-                    queue.append(current)
+                    queue.append(neighbor)
 
         return False
