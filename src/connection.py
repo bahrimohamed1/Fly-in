@@ -21,9 +21,10 @@ class Connection:
         self.zone2: Zone = zone2
         self.max_link_capacity: int = max_link_capacity
 
-    def key(self) -> tuple[str, str]:
-        """Return a normalized key for duplicate detection."""
-        return tuple(sorted((self.zone1.name, self.zone2.name)))
+    def key(self) -> str:
+        """Return the connection key (zones using it)"""
+        key: str = sorted([self.zone1.name, self.zone2.name])
+        return f"{key[0]}-{key[1]}"
 
     def connects(self, zone_a: Zone, zone_b: Zone) -> bool:
         """Return True if this connection links zone_a and zone_b.
