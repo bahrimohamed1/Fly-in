@@ -88,10 +88,16 @@ class Parser:
                                 zone1, zone2 = connects.split('-')
                                 metadata = connection[br:-1]
 
+                            zone1_obj: Zone = self.hubs.get(zone1)
+                            zone2_obj: Zone = self.hubs.get(zone2)
+                            if not zone1_obj or not zone2_obj:
+                                raise ValueError(f"ERROR on line {i}: {zone1} or"
+                                               f"{zone2} is not a valid hub")
+
                             metadata_dict = self._parse_metadata(metadata)
                             self.connections.append(Connection(
-                                zone1,
-                                zone2,
+                                zone1_obj,
+                                zone2_obj,
                                 metadata_dict.get('max_link_capacity')
                             ))
 
@@ -133,7 +139,7 @@ class Parser:
     def get_end_zone(self) -> Zone:
         return self.end_zone
 
-    def get_zones(self) -> Dict[str, Any]:
+    def get_zones(self) -> Dict[str, Zone]:
         return self.hubs
 
     def get_connections(self) -> List[Connection]:

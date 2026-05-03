@@ -1,14 +1,14 @@
-from src import Zone, Connection, Drone, Parser
+from src import Zone, Connection, Graph, Parser
+from typing import Dict, Tuple, List
 
-# print()
-# parser = Parser("maps/easy/01_linear_path.txt")
-# parser.parse()
+def main():
+    parser: Parser = Parser('maps/easy/01_linear_path.txt')
+    parser.parse()
+    zones: Dict[str, Zone] = parser.get_zones()
+    connections: List[Connection] = parser.get_connections()
+    graph: Graph = Graph(zones, connections)
+    
 
-# print(f"Number of drones: {parser.nb_drones}")
-# print(f"Hubs: {parser.hubs}")
-# print(f"Connections: {parser.connections}")
 
-# parsing = Parser("maps/easy/01_linear_path.txt")
-# parsing.parse()
-diiict = {'str': 'hello', 'name': 'simo'}
-print(diiict.get('age'))
+if __name__ == '__main__':
+    main()
