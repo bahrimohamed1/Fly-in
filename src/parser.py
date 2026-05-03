@@ -92,7 +92,7 @@ class Parser:
                             zone2_obj: Zone = self.hubs.get(zone2)
                             if not zone1_obj or not zone2_obj:
                                 raise ValueError(f"ERROR on line {i}: {zone1} or"
-                                               f"{zone2} is not a valid hub")
+                                                 f"{zone2} is not a valid hub")
 
                             metadata_dict = self._parse_metadata(metadata)
                             self.connections.append(Connection(

@@ -17,7 +17,7 @@ class ReservationTable:
 
         return self.zone_reservations[zone_name][turn]
 
-    def _can_reserve_zone(self, zone_name: str, turn: int) -> bool:
+    def can_reserve_zone(self, zone_name: str, turn: int) -> bool:
         current: int = self.get_zone_count(zone_name, turn)
         zone: Zone = self.graph.get_zone(zone_name)
 
@@ -44,7 +44,7 @@ class ReservationTable:
 
         return self.connection_reservations[connection_key][turn]
 
-    def _can_reserve_connection(
+    def can_reserve_connection(
             self,
             connection_key: str, turn: int
     ) -> bool:
@@ -69,3 +69,7 @@ class ReservationTable:
             self.connection_reservations[connection_key][turn] = 0
 
         self.connection_reservations[connection_key][turn] += 1
+
+
+    def is_wait_valid(self, zone: Zone, turn: int) -> None:
+        pass
