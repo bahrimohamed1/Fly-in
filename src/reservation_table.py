@@ -19,12 +19,15 @@ class ReservationTable:
 
     def can_reserve_zone(self, zone_name: str, turn: int) -> bool:
         current: int = self.get_zone_count(zone_name, turn)
+
         zone: Zone = self.graph.get_zone(zone_name)
+        if not zone:
+            raise ValueError("Unknown zone")
 
         return current < zone.max_drones
 
     def reserve_zone(self, zone_name: str, turn: int) -> None:
-        if not self._can_reserve_zone(zone_name, turn):
+        if not self.can_reserve_zone(zone_name, turn):
             raise ValueError(f"Cannot reserve {zone_name} at turn {turn}")
 
         if zone_name not in self.zone_reservations:
@@ -35,41 +38,90 @@ class ReservationTable:
 
         self.zone_reservations[zone_name][turn] += 1
 
+    @classmethod
+    def _normalize_key(connection_key: str) -> str:
+        zone_a, zone_b = connection_key.split('-', 1)
+        zone_a, zone_b = sorted([zone_a, zone_b])
+        return f"{zone_a}-{zone_b}"
+
     def get_connection_count(self, connection_key: str, turn: int) -> int:
-        if connection_key not in self.connection_reservations:
+        normalized_key: str = self._normalize_key(connection_key)
+
+        if normalized_key not in self.connection_reservations:
             return 0
 
-        if turn not in self.connection_reservations[connection_key]:
+        if turn not in self.connection_reservations[normalized_key]:
             return 0
 
-        return self.connection_reservations[connection_key][turn]
+        return self.connection_reservations[normalized_key][turn]
 
     def can_reserve_connection(
             self,
             connection_key: str, turn: int
     ) -> bool:
-        current_count: int = self.get_connection_count(connection_key, turn)
+        normalized_key: str = self._normalize_key(connection_key)
 
-        zone_a, zone_b = connection_key.split('-', 1)
+        current_count: int = self.get_connection_count(normalized_key, turn)
+
+        zone_a, zone_b = normalized_key.split('-', 1)
+
         zone_a_obj: Zone = self.graph.get_zone(zone_a)
         zone_b_obj: Zone = self.graph.get_zone(zone_b)
+        if not zone_a_obj or not zone_b_obj:
+            raise ValueError("Unknown zone")
+
         connection: Connection = self.graph.get_connection(
             zone_a_obj, zone_b_obj)
+        if not connection:
+            raise ValueError("Unknown connection")
 
         return current_count < connection.max_link_capacity
 
     def reserve_connection(self, connection_key: str, turn: int) -> None:
-        if not self._can_reserve_connection(connection_key, turn):
-            raise ValueError(f"Cannot reserve {connection_key} at turn {turn}")
+        normalized_key: str = self._normalize_key(connection_key)
 
-        if connection_key not in self.connection_reservations:
-            self.connection_reservations[connection_key] = {}
+        if not self.can_reserve_connection(normalized_key, turn):
+            raise ValueError(f"Cannot reserve {normalized_key} at turn {turn}")
 
-        if turn not in self.connection_reservations[connection_key]:
-            self.connection_reservations[connection_key][turn] = 0
+        if normalized_key not in self.connection_reservations:
+            self.connection_reservations[normalized_key] = {}
 
-        self.connection_reservations[connection_key][turn] += 1
+        if turn not in self.connection_reservations[normalized_key]:
+            self.connection_reservations[normalized_key][turn] = 0
 
+        self.connection_reservations[normalized_key][turn] += 1
 
-    def is_wait_valid(self, zone: Zone, turn: int) -> None:
-        pass
+    def is_wait_valid(self, zone: Zone, turn: int) -> bool:
+        next_turn: int = turn + 1
+
+        if zone.zone_type == 'blocked':
+            return False
+
+        if not self.can_reserve_zone(zone.name, next_turn):
+            return False
+
+        return True
+
+    def is_normal_move_valid(
+        self, current_zone: Zone, neighbor_zone: Zone, turn: int
+    ) -> bool:
+        next_turn: int = turn + 1
+
+        if neighbor_zone.zone_type == 'blocked':
+            return False
+        
+        if neighbor_zone.zone_type == 'restricted':
+            return False
+
+        if not self.can_reserve_zone(neighbor_zone.name, next_turn):
+            return False
+
+        connection: Connection = self.graph.get_connection(current_zone, neighbor_zone)
+        if not connection:
+            raise ValueError(f"Unknown connection")
+        
+        connection_key: str = connection.key()
+        if not self.can_reserve_connection(connection_key, next_turn):
+            return False
+        
+        return True
