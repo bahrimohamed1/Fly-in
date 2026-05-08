@@ -7,8 +7,8 @@ class Parser:
     def __init__(self, file_name: str) -> None:
         self.file_name: str = file_name
         self.nb_drones: int = 0
-        self.start_zone: Zone = None
-        self.end_zone: Zone = None
+        self.start_zone: Zone | None = None
+        self.end_zone: Zone | None = None
         self.hubs: Dict[str, Zone] = {}
         self.connections: List[Connection] = []
         self.drones: List[Drone] = []
@@ -23,7 +23,7 @@ class Parser:
         try:
             with open(self.file_name, "r") as file:
                 for i, line in enumerate(file, 1):
-                    line: str = line.strip()
+                    line = line.strip()
                     if line.startswith('#') or line.startswith('\n'):
                         continue
                     if line.startswith("nb_drones"):
@@ -41,12 +41,12 @@ class Parser:
                         try:
                             info: str = line.split(':', 1)[1].strip()
                             br = info.find('[')
+                            metadata: str = ""
                             if br == -1:
                                 name, x, y = info.split()
-                                metadata: str = ""
                             else:
                                 name, x, y = info[:br].split()
-                                metadata: str = info[br:].strip('[]')
+                                metadata = info[br:].strip('[]')
                             try:
                                 metadata_dict: Dict[str, Any] = \
                                     self._parse_metadata(metadata)
@@ -91,8 +91,9 @@ class Parser:
                             zone1_obj: Zone = self.hubs.get(zone1)
                             zone2_obj: Zone = self.hubs.get(zone2)
                             if not zone1_obj or not zone2_obj:
-                                raise ValueError(f"ERROR on line {i}: {zone1} or"
-                                                 f"{zone2} is not a valid hub")
+                                raise ValueError(f"ERROR on line {i}: "
+                                                 f"{zone1} or {zone2} "
+                                                 f"is not a valid hub")
 
                             metadata_dict = self._parse_metadata(metadata)
                             self.connections.append(Connection(

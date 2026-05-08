@@ -1,4 +1,5 @@
 from .zone import Zone
+from typing import List
 
 
 class Connection:
@@ -23,7 +24,7 @@ class Connection:
 
     def key(self) -> str:
         """Return the connection key (zones using it)"""
-        key: str = sorted([self.zone1.name, self.zone2.name])
+        key: List[str] = sorted([self.zone1.name, self.zone2.name])
         return f"{key[0]}-{key[1]}"
 
     def connects(self, zone_a: Zone, zone_b: Zone) -> bool:

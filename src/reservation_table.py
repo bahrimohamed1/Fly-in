@@ -20,7 +20,7 @@ class ReservationTable:
     def can_reserve_zone(self, zone_name: str, turn: int) -> bool:
         current: int = self.get_zone_count(zone_name, turn)
 
-        zone: Zone = self.graph.get_zone(zone_name)
+        zone: Zone | None = self.graph.get_zone(zone_name)
         if not zone:
             raise ValueError("Unknown zone")
 
@@ -65,12 +65,12 @@ class ReservationTable:
 
         zone_a, zone_b = normalized_key.split('-', 1)
 
-        zone_a_obj: Zone = self.graph.get_zone(zone_a)
-        zone_b_obj: Zone = self.graph.get_zone(zone_b)
+        zone_a_obj: Zone | None = self.graph.get_zone(zone_a)
+        zone_b_obj: Zone | None = self.graph.get_zone(zone_b)
         if not zone_a_obj or not zone_b_obj:
             raise ValueError("Unknown zone")
 
-        connection: Connection = self.graph.get_connection(
+        connection: Connection | None = self.graph.get_connection(
             zone_a_obj, zone_b_obj)
         if not connection:
             raise ValueError("Unknown connection")
@@ -116,10 +116,10 @@ class ReservationTable:
         if not self.can_reserve_zone(neighbor_zone.name, next_turn):
             return False
 
-        connection: Connection = self.graph.get_connection(
+        connection: Connection | None = self.graph.get_connection(
             current_zone, neighbor_zone)
         if not connection:
-            raise ValueError(f"Unknown connection")
+            raise ValueError("Unknown connection")
 
         connection_key: str = connection.key()
         if not self.can_reserve_connection(connection_key, next_turn):
@@ -142,7 +142,7 @@ class ReservationTable:
         if not self.can_reserve_zone(neighbor_zone.name, arrival_turn):
             return False
 
-        connection: Connection = self.graph.get_connection(
+        connection: Connection | None = self.graph.get_connection(
             current_zone, neighbor_zone)
         if not connection:
             return False
@@ -162,3 +162,24 @@ class ReservationTable:
                              f"is not available at turn {next_turn}")
 
         self.reserve_zone(zone_name, next_turn)
+
+    def reserve_normal_move(
+        self, current_zone: Zone, neighbor_zone: Zone, turn: int
+    ) -> None:
+        next_turn: int = turn + 1
+        current_zone_name: str = current_zone.name
+        neighbor_zone_name: str = neighbor_zone.name
+
+        if not self.is_normal_move_valid(current_zone, neighbor_zone, turn):
+            raise ValueError("Cannot reserve normal move: "
+                             f"drone cannot move from {current_zone_name} to "
+                             f"{neighbor_zone_name} at turn {next_turn}")
+
+        connection: Connection | None = self.graph.get_connection(
+            current_zone, neighbor_zone)
+        if not connection:
+            raise ValueError("Unknown connection")
+        connection_key: str = connection.key()
+
+        self.reserve_connection(connection_key, next_turn)
+        self.reserve_zone(neighbor_zone_name, next_turn)
