@@ -152,3 +152,13 @@ class ReservationTable:
             return False
 
         return True
+
+    def reserve_wait(self, zone: Zone, turn: int) -> None:
+        next_turn: int = turn + 1
+        zone_name: str = zone.name
+
+        if not self.is_wait_valid(zone, turn):
+            raise ValueError(f"Cannot reserve wait: Zone {zone_name} "
+                             f"is not available at turn {next_turn}")
+
+        self.reserve_zone(zone_name, next_turn)
