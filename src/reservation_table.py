@@ -38,7 +38,7 @@ class ReservationTable:
 
         self.zone_reservations[zone_name][turn] += 1
 
-    @classmethod
+    @staticmethod
     def _normalize_key(connection_key: str) -> str:
         zone_a, zone_b = connection_key.split('-', 1)
         zone_a, zone_b = sorted([zone_a, zone_b])
@@ -109,19 +109,46 @@ class ReservationTable:
 
         if neighbor_zone.zone_type == 'blocked':
             return False
-        
+
         if neighbor_zone.zone_type == 'restricted':
             return False
 
         if not self.can_reserve_zone(neighbor_zone.name, next_turn):
             return False
 
-        connection: Connection = self.graph.get_connection(current_zone, neighbor_zone)
+        connection: Connection = self.graph.get_connection(
+            current_zone, neighbor_zone)
         if not connection:
             raise ValueError(f"Unknown connection")
-        
+
         connection_key: str = connection.key()
         if not self.can_reserve_connection(connection_key, next_turn):
             return False
-        
+
+        return True
+
+    def is_restricted_move_valid(
+        self, current_zone: Zone, neighbor_zone: Zone, turn: int
+    ) -> bool:
+        next_turn: int = turn + 1
+        arrival_turn: int = next_turn + 1
+
+        if neighbor_zone.zone_type == 'blocked':
+            return False
+
+        if neighbor_zone.zone_type != 'restricted':
+            return False
+
+        if not self.can_reserve_zone(neighbor_zone.name, arrival_turn):
+            return False
+
+        connection: Connection = self.graph.get_connection(
+            current_zone, neighbor_zone)
+        if not connection:
+            return False
+
+        connection_key: str = connection.key()
+        if not self.can_reserve_connection(connection_key, next_turn):
+            return False
+
         return True
