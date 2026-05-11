@@ -61,7 +61,7 @@ class ReservationTable:
     ) -> bool:
         normalized_key: str = self._normalize_key(connection_key)
 
-        current_count: int = self.get_connection_count(normalized_key, turn)
+        current_count: int = self.get_connection_count(connection_key, turn)
 
         zone_a, zone_b = normalized_key.split('-', 1)
 
@@ -151,6 +151,9 @@ class ReservationTable:
         if not self.can_reserve_connection(connection_key, next_turn):
             return False
 
+        if not self.can_reserve_connection(connection_key, arrival_turn):
+            return False
+
         return True
 
     def reserve_wait(self, zone: Zone, turn: int) -> None:
@@ -183,3 +186,26 @@ class ReservationTable:
 
         self.reserve_connection(connection_key, next_turn)
         self.reserve_zone(neighbor_zone_name, next_turn)
+
+    def reserve_restricted_move(
+        self, current_zone: Zone, neighbor_zone: Zone, turn: int
+    ) -> None:
+        next_turn: int = turn + 1
+        arrival_turn: int = turn + 2
+        current_zone_name: str = current_zone.name
+        neighbor_zone_name: str = neighbor_zone.name
+
+        if not self.is_restricted_move_valid(current_zone, neighbor_zone, turn):
+            raise ValueError("Cannot reserve restricted move: "
+                             f"drone cannot move from {current_zone_name} to "
+                             f"{neighbor_zone_name} at turn {arrival_turn}")
+
+        connection: Connection | None = self.graph.get_connection(
+            current_zone, neighbor_zone)
+        if not connection:
+            raise ValueError("Unknown connection")
+        connection_key: str = connection.key()
+
+        self.reserve_connection(connection_key, next_turn)
+        self.reserve_connection(connection_key, arrival_turn)
+        self.reserve_zone(neighbor_zone_name, arrival_turn)
