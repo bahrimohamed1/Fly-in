@@ -195,7 +195,8 @@ class ReservationTable:
         current_zone_name: str = current_zone.name
         neighbor_zone_name: str = neighbor_zone.name
 
-        if not self.is_restricted_move_valid(current_zone, neighbor_zone, turn):
+        if not self.is_restricted_move_valid(
+                current_zone, neighbor_zone, turn):
             raise ValueError("Cannot reserve restricted move: "
                              f"drone cannot move from {current_zone_name} to "
                              f"{neighbor_zone_name} at turn {arrival_turn}")

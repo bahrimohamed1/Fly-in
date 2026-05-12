@@ -22,4 +22,7 @@ lint:
 
 lint-strict:
 	flake8 .
-	numpy . --strict
+	mypy . --strict
+
+install:
+	pip install flake8 mypy

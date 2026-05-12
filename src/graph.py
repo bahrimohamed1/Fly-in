@@ -51,7 +51,7 @@ class Graph:
 
         visited: set[str] = set()
 
-        queue: deque[str] = []
+        queue: deque[str] = deque()
         queue.appendleft(start.name)
 
         while queue:
