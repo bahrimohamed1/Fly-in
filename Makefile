@@ -25,4 +25,4 @@ lint-strict:
 	mypy . --strict
 
 install:
-	pip install flake8 mypy
+	pip install flake8 mypy pygame
