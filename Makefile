@@ -3,6 +3,8 @@ MAP = maps/easy/01_linear_path.txt
 # install:
 # 	pip install -r requirements.txt
 
+all: test
+
 run:
 	@python3 main.py
 
@@ -24,5 +26,9 @@ lint-strict:
 	flake8 .
 	mypy . --strict
 
+# remove later (maybe)
 install:
 	pip install flake8 mypy pygame
+
+test:
+	python3 test_pygame.py
