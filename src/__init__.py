@@ -6,9 +6,10 @@ from .graph import Graph
 from .reservation_table import ReservationTable
 from .path_step import PathStep
 from .drone_path import DronePath
+from .search_state import SearchState
 from typing import Any
 
-__all__: Any = (
+test: Any = (
     Zone,
     Connection,
     Drone,
@@ -16,5 +17,6 @@ __all__: Any = (
     Graph,
     ReservationTable,
     PathStep,
-    DronePath
+    DronePath,
+    SearchState
 )

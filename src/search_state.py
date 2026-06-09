@@ -3,7 +3,11 @@ from . import Zone, PathStep
 
 
 class SearchState:
-    def __init__(self, zone: Zone, turn: int, path_steps: List[PathStep]) -> None:
+    def __init__(self,
+                 zone: Zone,
+                 turn: int,
+                 path_steps: List[PathStep]
+                 ) -> None:
         self.zone: Zone = zone
         self.turn: int = turn
         self.path_steps: List[PathStep] = path_steps
