@@ -227,7 +227,7 @@ class ReservationTable:
 
         start_zone: Optional[Zone] = self.graph.get_zone(first_step.name)
         if not start_zone:
-            raise ValueError(f"ERROR: zone {first_step.name} does not exist")
+            raise ValueError(f"ERROR: zone '{first_step.name}' does not exist")
 
         self.reserve_zone(start_zone.name, 0)
 
@@ -243,7 +243,7 @@ class ReservationTable:
                 current_step.name)
             if not current_zone:
                 raise ValueError(
-                    f"ERROR: zone{current_step.name} does not exist")
+                    f"ERROR: zone '{current_step.name}' does not exist")
 
             next_step: PathStep = path_steps[i+1]
 
@@ -253,7 +253,7 @@ class ReservationTable:
 
                 if not next_zone:
                     raise ValueError(
-                        f"ERROR: zone{next_step.name} does not exist")
+                        f"ERROR: zone '{next_step.name}' does not exist")
 
                 expected_turn: int = current_step.turn + 1
                 if expected_turn != next_step.turn:
@@ -285,7 +285,7 @@ class ReservationTable:
                     arrival_step.name)
                 if not arrival_zone:
                     raise ValueError(
-                        f"ERROR: zone {arrival_step.name} does not exist")
+                        f"ERROR: zone '{arrival_step.name}' does not exist")
                 if arrival_zone.zone_type != 'restricted':
                     raise ValueError(
                         f"ERROR: Zone '{arrival_zone.name}' is not restricted")
@@ -294,7 +294,7 @@ class ReservationTable:
                     current_zone, arrival_zone)
                 if not next_connection:
                     raise ValueError(
-                        f"ERROR: Connection {next_step.name} does not exist")
+                        f"ERROR: Connection '{next_step.name}' does not exist")
 
                 connection_key: str = next_connection.key()
                 if connection_key != next_step.name:
