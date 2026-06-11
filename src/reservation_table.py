@@ -1,5 +1,5 @@
-from . import Zone, Connection, Graph
-from typing import Dict
+from . import Zone, Connection, Graph, PathStep
+from typing import Dict, List, Optional
 
 
 class ReservationTable:
@@ -210,3 +210,112 @@ class ReservationTable:
         self.reserve_connection(connection_key, next_turn)
         self.reserve_connection(connection_key, arrival_turn)
         self.reserve_zone(neighbor_zone_name, arrival_turn)
+
+    def reserve_path(self, path_steps: List[PathStep]) -> None:
+        if not path_steps:
+            raise ValueError(f"ERROR: Path is empty")
+
+        first_step: PathStep = path_steps[0]
+        if first_step.kind != 'zone':
+            raise ValueError(
+                f"ERROR: First step '{first_step.name}' is not a zone")
+
+        if first_step.turn != 0:
+            raise ValueError(
+                f"ERROR: First step '{first_step.name}' turn is not 0:"
+                f"got {first_step.turn}")
+
+        start_zone: Optional[Zone] = self.graph.get_zone(first_step.name)
+        if not start_zone:
+            raise ValueError(f"ERROR: zone {first_step.name} does not exist")
+
+        self.reserve_zone(start_zone.name, 0)
+
+        i: int = 0
+        while i < len(path_steps) - 1:
+            current_step: PathStep = path_steps[i]
+
+            if current_step.kind != 'zone':
+                raise ValueError(
+                    f"ERROR: Current step '{current_step.name}' is not a zone")
+
+            current_zone: Optional[Zone] = self.graph.get_zone(
+                current_step.name)
+            if not current_zone:
+                raise ValueError(
+                    f"ERROR: zone{current_step.name} does not exist")
+
+            next_step: PathStep = path_steps[i+1]
+
+            # wait / normal
+            if next_step.kind == 'zone':
+                next_zone: Optional[Zone] = self.graph.get_zone(next_step.name)
+
+                if not next_zone:
+                    raise ValueError(
+                        f"ERROR: zone{next_step.name} does not exist")
+
+                expected_turn: int = current_step.turn + 1
+                if expected_turn != next_step.turn:
+                    raise ValueError("ERROR: Invalid wait/normal move timing")
+
+                # wait
+                if next_zone.name == current_step.name:
+                    self.reserve_wait(current_zone, current_step.turn)
+
+                # normal
+                else:
+                    self.reserve_normal_move(
+                        current_zone, next_zone, current_step.turn)
+
+                i += 1
+
+            # restricted
+            elif next_step.kind == 'connection':
+                if i + 2 >= len(path_steps):
+                    raise ValueError(
+                        "ERROR: Not enough steps for arrival zone")
+
+                arrival_step: PathStep = path_steps[i+2]
+                if arrival_step.kind != 'zone':
+                    raise ValueError(
+                        "ERROR: Restricted move must end with a zone step")
+
+                arrival_zone: Optional[Zone] = self.graph.get_zone(
+                    arrival_step.name)
+                if not arrival_zone:
+                    raise ValueError(
+                        f"ERROR: zone {arrival_step.name} does not exist")
+                if arrival_zone.zone_type != 'restricted':
+                    raise ValueError(
+                        f"ERROR: Zone '{arrival_zone.name}' is not restricted")
+
+                next_connection: Optional[Connection] = self.graph.get_connection(
+                    current_zone, arrival_zone)
+                if not next_connection:
+                    raise ValueError(
+                        f"ERROR: Connection {next_step.name} does not exist")
+
+                connection_key: str = next_connection.key()
+                if connection_key != next_step.name:
+                    raise ValueError(
+                        "Connection step does not match actual connection")
+
+                next_turn: int = current_step.turn + 1
+                arrival_turn: int = current_step.turn + 2
+
+                if next_step.turn != next_turn:
+                    raise ValueError(
+                        "ERROR: Invalid restricted connection timing")
+
+                if arrival_step.turn != arrival_turn:
+                    raise ValueError(
+                        "ERROR: Invalid restricted arrival timing")
+
+                self.reserve_restricted_move(
+                    current_zone, arrival_zone, current_step.turn)
+
+                i += 2
+
+            else:
+                raise ValueError("ERROR: Invalid path step kind")
