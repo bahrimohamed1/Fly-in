@@ -10,11 +10,11 @@ class Scheduler:
             self.graph, self.reservation_table)
 
     def schedule_drones(self,
-                        start_zone: Zone,
-                        end_zone: Zone,
                         nb_drones: int,
                         max_turns: int) -> Dict[int, List[PathStep]]:
         all_paths: Dict[int, List[PathStep]] = {}
+        start_zone: Zone = self.graph.start_zone
+        end_zone: Zone = self.graph.end_zone
 
         for drone_id in range(1, nb_drones+1):
             path: Optional[List[PathStep]] = self.pathfinder.find_path(

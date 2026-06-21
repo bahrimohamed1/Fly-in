@@ -1,15 +1,17 @@
 from . import PathStep
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 class OutputBuilder:
-    def __init__(self) -> None:
-        pass
 
     def build_output(self, all_paths: Dict[int, List[PathStep]]) -> List[str]:
         movement_by_turn: Dict[int, List[str]] = {}
+        max_turns: int = 0
 
-        for drone_id, path_steps in all_paths.items():
+        for drone_id, path_steps in sorted(all_paths.items()):
+            for step in path_steps:
+                if step.turn > max_turns:
+                    max_turns = step.turn
             for i in range(1, len(path_steps)):
                 previous_step = path_steps[i-1]
                 current_step = path_steps[i]
@@ -28,7 +30,7 @@ class OutputBuilder:
 
         output_lines: List[str] = []
 
-        for turn in range(1, max(movement_by_turn.keys()) + 1):
+        for turn in range(1, max_turns + 1):
             if turn in movement_by_turn:
                 line: str = " ".join(movement_by_turn[turn])
             else:

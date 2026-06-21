@@ -7,11 +7,22 @@ class Graph:
     def __init__(
         self,
         zones: Dict[str, Zone],
-        connections: List[Connection]
+        connections: List[Connection],
+        start_zone: Zone,
+        end_zone: Zone
     ) -> None:
         self.zones: Dict[str, Zone] = zones
         self.connections: List[Connection] = connections
         self.adjacency_list: Dict[str, List[Tuple[Zone, Connection]]] = {}
+        self.start_zone: Zone = start_zone
+        self.end_zone: Zone = end_zone
+
+        if start_zone.name not in zones or start_zone.zone_type == 'blocked':
+            raise ValueError(f"ERROR: {start_zone.name} is invalid")
+
+        if end_zone.name not in zones or end_zone.zone_type == 'blocked':
+            raise ValueError(f"ERROR: {end_zone.name} is invalid")
+
         self._build_adjacency_list()
 
     def _build_adjacency_list(self) -> None:
