@@ -1,4 +1,4 @@
-from src import Zone, Connection, Graph, Parser, ReservationTable, DronePath, PathStep, PathFinder, Scheduler
+from src import *
 from typing import Dict, List
 
 
@@ -24,11 +24,9 @@ def test_find_path():
     graph = Graph(zones, connections)
     
     main_scheduler: Scheduler = Scheduler(graph)
-    all_paths: Dict[int, List[PathStep]] = main_scheduler.schedule_drones(start_zone, end_zone, 3, 10)
-    for id, path in all_paths.items():
-        print(f"D{id}:")
-        for step in path:
-            print(f"    Turn {step.turn}: {step.name}")    
+    all_paths: Dict[int, List[PathStep]] = main_scheduler.schedule_drones(start_zone, end_zone, 2, 10)
+    output = OutputBuilder().build_output(all_paths)
+    print(*output, sep='\n')
 
 
 def main():

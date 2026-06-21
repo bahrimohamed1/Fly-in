@@ -9,6 +9,7 @@ from .drone_path import DronePath
 from .search_state import SearchState
 from .path_finder import PathFinder
 from .scheduler import Scheduler
+from .output_builder import OutputBuilder
 from typing import Any
 
 test: Any = (
