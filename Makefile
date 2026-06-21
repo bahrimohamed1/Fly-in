@@ -3,7 +3,7 @@ MAP = maps/easy/01_linear_path.txt
 # install:
 # 	pip install -r requirements.txt
 
-all: test
+all: run
 
 run:
 	@python3 main.py

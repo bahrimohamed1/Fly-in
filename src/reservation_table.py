@@ -213,7 +213,7 @@ class ReservationTable:
 
     def reserve_path(self, path_steps: List[PathStep]) -> None:
         if not path_steps:
-            raise ValueError(f"ERROR: Path is empty")
+            raise ValueError("ERROR: Path is empty")
 
         first_step: PathStep = path_steps[0]
         if first_step.kind != 'zone':
@@ -290,13 +290,13 @@ class ReservationTable:
                     raise ValueError(
                         f"ERROR: Zone '{arrival_zone.name}' is not restricted")
 
-                next_connection: Optional[Connection] = self.graph.get_connection(
+                next_conn: Optional[Connection] = self.graph.get_connection(
                     current_zone, arrival_zone)
-                if not next_connection:
+                if not next_conn:
                     raise ValueError(
                         f"ERROR: Connection '{next_step.name}' does not exist")
 
-                connection_key: str = next_connection.key()
+                connection_key: str = next_conn.key()
                 if connection_key != next_step.name:
                     raise ValueError(
                         "Connection step does not match actual connection")
