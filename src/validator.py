@@ -1,5 +1,5 @@
-from . import Graph, PathStep
-from typing import Dict, List
+from . import Graph, PathStep, Zone, Connection
+from typing import Dict, List, Optional
 
 
 class Validator:
@@ -44,5 +44,94 @@ class Validator:
                         f"Drone {drone_id} turns are not strictly increasing")
 
                 previous_turn = step.turn
+
+        return True
+
+    def validate_transitions(self,
+                             all_paths: Dict[int, List[PathStep]]) -> bool:
+        for drone_id, path_steps in all_paths.items():
+            i = 0
+            while i < len(path_steps) - 1:
+                previous: PathStep = path_steps[i]
+                current: PathStep = path_steps[i+1]
+
+                if previous.kind != 'zone':
+                    raise ValueError(f"Drone {drone_id} has invalid "
+                                     "transition starting from non-zone")
+
+                previous_zone: Optional[Zone] = self.graph.get_zone(
+                    previous.name)
+                if not previous_zone:
+                    raise ValueError(f"{previous.name} does not exist")
+
+                # WAIT & NORMAL
+                if current.kind == 'zone':
+                    current_zone: Optional[Zone] = self.graph.get_zone(
+                        current.name)
+                    if not current_zone:
+                        raise ValueError(f"{current.name} does not exist")
+
+                    # WAIT
+                    if current_zone.name == previous_zone.name:
+                        if current_zone.zone_type == 'blocked':
+                            raise ValueError(f"{current_zone.name} is blocked")
+
+                        i = i + 1
+                        continue
+
+                    if current_zone.zone_type == 'blocked':
+                        raise ValueError(f"{current_zone.name} is blocked")
+
+                    if current_zone.zone_type == 'restricted':
+                        raise ValueError(
+                            "Restricted zone entered without connection step")
+
+                    connection: Connection | None = self.graph.get_connection(
+                        previous_zone, current_zone)
+                    if not connection:
+                        raise ValueError(
+                            "Illegal move: zones are not connected")
+
+                    i = i + 1
+                    continue
+
+                # RESTRICTED
+                if current.kind == 'connection':
+                    if i + 2 >= len(path_steps):
+                        raise ValueError(
+                            "Connection step missing arrival zone")
+
+                    arrival: PathStep = path_steps[i+2]
+                    if arrival.kind != 'zone':
+                        raise ValueError("Restricted zone must end in a zone")
+
+                    arrival_zone: Optional[Zone] = self.graph.get_zone(
+                        arrival.name)
+                    if not arrival_zone:
+                        raise ValueError(f"{arrival.name} does not exist")
+
+                    if arrival_zone.zone_type != 'restricted':
+                        raise ValueError(f"{arrival_zone.zone_type} must be"
+                                         "a restricted zone")
+
+                    connection = self.graph.get_connection(
+                        previous_zone, arrival_zone)
+                    if not connection:
+                        raise ValueError(
+                            "No connection for restricted movement")
+
+                    if current.name != connection.key():
+                        raise ValueError("Wrong connection step")
+
+                    if current.turn != previous.turn + 1:
+                        raise ValueError("Wrong connection turn")
+
+                    if arrival.turn != previous.turn + 2:
+                        raise ValueError("Wrong arrival turn")
+
+                    i = i + 2
+                    continue
+
+                raise ValueError("Invalid step kind")
 
         return True

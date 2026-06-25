@@ -69,30 +69,30 @@ class PathFinder:
                             queue, (arrival_turn, counter, new_state))
                 # normal
                 else:
-                    next_turn: int = current_turn + 1
+                    next_turn = current_turn + 1
                     if next_turn > max_turns:
                         continue
                     if self.reservation_table.is_normal_move_valid(
                             current_zone, neighbor_zone, current_turn):
                         new_step: PathStep = PathStep(
                             next_turn, 'zone', neighbor_zone.name)
-                        new_path: List[PathStep] = current_path + [new_step]
-                        new_state: SearchState = SearchState(
+                        new_path = current_path + [new_step]
+                        new_state = SearchState(
                             neighbor_zone, next_turn, new_path)
                         counter += 1
 
                         heapq.heappush(queue, (next_turn, counter, new_state))
 
             # wait
-            next_turn: int = current_turn + 1
+            next_turn = current_turn + 1
             if next_turn > max_turns:
                 continue
             if self.reservation_table.is_wait_valid(
                     current_zone, current_turn):
-                new_step: PathStep = PathStep(
+                new_step = PathStep(
                     next_turn, 'zone', current_zone.name)
-                new_path: List[PathStep] = current_path + [new_step]
-                new_state: SearchState = SearchState(
+                new_path = current_path + [new_step]
+                new_state = SearchState(
                     current_zone, next_turn, new_path)
                 counter += 1
 

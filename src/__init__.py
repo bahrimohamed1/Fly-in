@@ -10,6 +10,7 @@ from .search_state import SearchState
 from .path_finder import PathFinder
 from .scheduler import Scheduler
 from .output_builder import OutputBuilder
+from .validator import Validator
 from typing import Any
 
 test: Any = (
@@ -21,5 +22,9 @@ test: Any = (
     ReservationTable,
     PathStep,
     DronePath,
-    SearchState
+    SearchState,
+    PathFinder,
+    Scheduler,
+    OutputBuilder,
+    Validator
 )
