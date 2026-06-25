@@ -1,5 +1,5 @@
 from . import PathStep
-from typing import List
+from typing import List, Optional
 
 
 class DronePath:
@@ -10,7 +10,7 @@ class DronePath:
     def add_step(self, step: PathStep) -> None:
         self.steps.append(step)
 
-    def get_last_step(self) -> PathStep | None:
+    def get_last_step(self) -> Optional[PathStep]:
         if not self.steps:
             return None
 

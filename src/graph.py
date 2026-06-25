@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from . import Connection, Zone
 from collections import deque
 
@@ -43,10 +43,10 @@ class Graph:
 
         return self.adjacency_list[zone_name]
 
-    def get_zone(self, zone_name: str) -> Zone | None:
+    def get_zone(self, zone_name: str) -> Optional[Zone]:
         return self.zones.get(zone_name)
 
-    def get_connection(self, zone_a: Zone, zone_b: Zone) -> Connection | None:
+    def get_connection(self, zone_a: Zone, zone_b: Zone) -> Optional[Connection]:
         for connection in self.connections:
             if connection.zone1.name == zone_a.name and \
                     connection.zone2.name == zone_b.name or \
