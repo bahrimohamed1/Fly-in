@@ -277,5 +277,5 @@ class Validator:
         self.validate_paths_structure(all_paths)
         self.validate_transitions(all_paths)
         self.validate_capacities(all_paths)
-        
+
         return True

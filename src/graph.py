@@ -46,7 +46,8 @@ class Graph:
     def get_zone(self, zone_name: str) -> Optional[Zone]:
         return self.zones.get(zone_name)
 
-    def get_connection(self, zone_a: Zone, zone_b: Zone) -> Optional[Connection]:
+    def get_connection(self,
+                       zone_a: Zone, zone_b: Zone) -> Optional[Connection]:
         for connection in self.connections:
             if connection.zone1.name == zone_a.name and \
                     connection.zone2.name == zone_b.name or \
