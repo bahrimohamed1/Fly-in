@@ -18,6 +18,9 @@ class ReservationTable:
         return self.zone_reservations[zone_name][turn]
 
     def can_reserve_zone(self, zone_name: str, turn: int) -> bool:
+        if zone_name == self.graph.start_zone.name:
+            return True
+
         current: int = self.get_zone_count(zone_name, turn)
 
         zone: Zone | None = self.graph.get_zone(zone_name)
@@ -228,8 +231,8 @@ class ReservationTable:
         start_zone: Optional[Zone] = self.graph.get_zone(first_step.name)
         if not start_zone:
             raise ValueError(f"ERROR: zone '{first_step.name}' does not exist")
-
-        self.reserve_zone(start_zone.name, 0)
+        if self.get_zone_count(start_zone.name, 0) == 0:
+            self.reserve_zone(start_zone.name, 0)
 
         i: int = 0
         while i < len(path_steps) - 1:

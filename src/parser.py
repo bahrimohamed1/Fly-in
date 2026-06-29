@@ -1,5 +1,8 @@
-from . import Zone, Connection, Graph
-from typing import List, Dict, Optional, Any
+from .zone import Zone
+from .connection import Connection
+from .graph import Graph
+
+from typing import List, Dict, Any
 
 
 class Parser:
@@ -8,8 +11,8 @@ class Parser:
         self.nb_drones: int = 0
         self.zones: Dict[str, Zone] = {}
         self.connections: List[Connection] = []
-        self.start_zone: Optional[Zone] = None
-        self.end_zone: Optional[Zone] = None
+        self.start_zone: Zone | None = None
+        self.end_zone: Zone | None = None
         self.valid_zone_types: set[str] = {
             'normal', 'priority', 'restricted', 'blocked'}
         self.seen_connections: set[str] = set()
@@ -37,15 +40,21 @@ class Parser:
                     raise ValueError("ERROR: UNKNOWN LINE TYPE")
 
             self._validate_final_result()
-            if not self.start_zone or not self.end_zone:
-                raise ValueError("ERROR: INVALID START ZONE OR END ZONE")
 
-            return Graph(
+            assert self.start_zone is not None
+            assert self.end_zone is not None
+
+            graph: Graph = Graph(
                 self.zones,
                 self.connections,
                 self.start_zone,
                 self.end_zone,
             )
+
+            if not graph.has_path(self.start_zone, self.end_zone):
+                raise ValueError("No path from start to end")
+
+            return graph
 
     def _parse_nb_drones(self, line: str, n: int) -> None:
         if self.nb_drones:
@@ -86,7 +95,8 @@ class Parser:
         for item in clean_metadata_txt.split():
             if '=' not in item:
                 raise ValueError(f"ERROR on line {n}: INVALID METADATA ITEM")
-
+            key: str | None = None
+            value: str | None = None
             key, value = item.split('=', 1)
             if not key or not value:
                 raise ValueError(f"ERROR on line {n}: INVALID METADATA ITEM")
@@ -96,7 +106,7 @@ class Parser:
 
             if key == 'max_drones' or key == 'max_link_capacity':
                 try:
-                    value: int = int(value)
+                    value = int(value)
                 except ValueError:
                     raise ValueError(
                         f"ERROR on line {n}: Metadata value must be integer")
@@ -165,7 +175,7 @@ class Parser:
         metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
         zone_type: str = metadata['zone']
         max_drones: int = metadata['max_drones']
-        color: Optional[str] = metadata['color']
+        color: str | None = metadata['color']
 
         zone: Zone = Zone(
             name,
@@ -217,9 +227,10 @@ class Parser:
 
         else:
             connection_part = content
-            if '-' not in connection_part:
-                raise ValueError(
-                    f"ERROR on line {n}: Connection must use A-B format")
+
+        if '-' not in connection_part:
+            raise ValueError(
+                f"ERROR on line {n}: Connection must use A-B format")
 
         zone_a_name, zone_b_name = connection_part.split('-', 1)
         zone_a_name: str = zone_a_name.strip()
@@ -232,8 +243,8 @@ class Parser:
             raise ValueError(
                 f"ERROR on line {n}: Self-connection is not allowed")
 
-        zone_a: Optional[Zone] = self.zones.get(zone_a_name)
-        zone_b: Optional[Zone] = self.zones.get(zone_b_name)
+        zone_a: Zone | None = self.zones.get(zone_a_name)
+        zone_b: Zone | None = self.zones.get(zone_b_name)
 
         if not zone_a or not zone_b:
             raise ValueError(f"ERROR on line {n}: Unknown zone")
@@ -270,6 +281,12 @@ class Parser:
 
         if not self.end_zone:
             raise ValueError("Missing end_zone")
+        
+        # if self.start_zone.max_drones < self.nb_drones:
+        #     raise ValueError("Invalid max_drones for start_hub")
+        
+        if self.end_zone.max_drones < self.nb_drones:
+            raise ValueError("Invalid max_drones for end_hub")
 
         if self.start_zone == self.end_zone:
             raise ValueError("start_hub and end_hub cannot be the same zone")
