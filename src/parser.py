@@ -108,12 +108,12 @@ class Parser:
                 metadata[key] = value
 
             elif key == 'zone':
-                if value not in valid_zone_types:
+                if value not in self.valid_zone_types:
                     raise ValueError(f"ERROR on line {n}: Invalid zone type")
 
                 metadata[key] = value
 
-            elif key == color:
+            elif key == 'color':
                 metadata[key] = value
 
         return metadata
@@ -136,61 +136,61 @@ class Parser:
             if not content.endswith(']'):
                 raise ValueError(f"ERROR on line {n}: Invalid metadata format")
 
-                bracket_index: int = content.find('[')
-                zone_part: str = content[:bracket_index]
-                metadata_txt: str = content[bracket_index:]
+            bracket_index: int = content.find('[')
+            zone_part: str = content[:bracket_index]
+            metadata_txt: str = content[bracket_index:]
 
-            else:
-                zone_part = content
+        else:
+            zone_part = content
 
-            parts: List[str] = zone_part.split()
-            if len(parts) != 3:
+        parts: List[str] = zone_part.split()
+        if len(parts) != 3:
+            raise ValueError(
+                F"ERROR on line {n}: zone format must be: name x y")
+
+        name = parts[0]
+        raw_x = parts[1]
+        raw_y = parts[2]
+
+        if name in self.zones:
+            raise ValueError(f"ERROR on line {n}: Duplicate zone")
+
+        try:
+            x: int = int(raw_x)
+            y: int = int(raw_y)
+        except ValueError:
+            raise ValueError(
+                f"ERROR on line {n}: Zone coordinates must be integers")
+
+        metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
+        zone_type: str = metadata['zone']
+        max_drones: int = metadata['max_drones']
+        color: Optional[str] = metadata['color']
+
+        zone: Zone = Zone(
+            name,
+            x,
+            y,
+            zone_type,
+            max_drones,
+            color
+        )
+
+        self.zones[name] = zone
+
+        if prefix == 'start_hub':
+            if self.start_zone:
                 raise ValueError(
-                    F"ERROR on line {n}: zone format must be: name x y")
+                    f"ERROR on line {n}: start_hub already defined")
 
-            name = parts[0]
-            raw_x = parts[1]
-            raw_y = parts[2]
+            self.start_zone = zone
 
-            if name in self.zones:
-                raise ValueError(f"ERROR on line {n}: Duplicate zone")
-
-            try:
-                x: int = int(raw_x)
-                y: int = int(raw_y)
-            except ValueError:
+        elif prefix == 'end_hub':
+            if self.end_zone:
                 raise ValueError(
-                    f"ERROR on line {n}: Zone coordinates must be integers")
+                    f"ERROR on line {n}: end_hub already defined")
 
-            metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
-            zone_type: str = metadata['zone']
-            max_drones: str = metadata['max_drones']
-            color: Optional[str] = metadata['color']
-
-            zone: Zone = Zone(
-                name,
-                x,
-                y,
-                zone_type,
-                max_drones,
-                color
-            )
-
-            self.zones[name] = zone
-
-            if prefix == 'start_zone':
-                if self.start_zone:
-                    raise ValueError(
-                        f"ERROR on line {n}: start_hub already defined")
-
-                self.start_zone = zone
-
-            elif prefix == 'end_zone':
-                if self.end_zone:
-                    raise ValueError(
-                        f"ERROR on line {n}: end_hub already defined")
-
-                self.end_zone = zone
+            self.end_zone = zone
 
     def _parse_connection_line(self, line: str, n: int) -> None:
         if ':' not in line:
@@ -256,4 +256,26 @@ class Parser:
             self.seen_connections.add(normalized_key)
 
     def _validate_final_result(self) -> None:
-        pass
+        if self.nb_drones <= 0:
+            raise ValueError("Missing or invalid nb_drones")
+
+        if not self.zones:
+            raise ValueError("No zones found")
+
+        if not self.connections:
+            raise ValueError("No connections found")
+
+        if not self.start_zone:
+            raise ValueError("Missing start_zone")
+
+        if not self.end_zone:
+            raise ValueError("Missing end_zone")
+
+        if self.start_zone == self.end_zone:
+            raise ValueError("start_hub and end_hub cannot be the same zone")
+
+        if self.start_zone.zone_type == 'blocked':
+            raise ValueError("start_zone cannot be blocked")
+
+        if self.end_zone.zone_type == 'blocked':
+            raise ValueError("end_zone cannot be blocked")
