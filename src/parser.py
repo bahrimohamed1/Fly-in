@@ -221,39 +221,39 @@ class Parser:
                 raise ValueError(
                     f"ERROR on line {n}: Connection must use A-B format")
 
-            zone_a_name, zone_b_name = connection_part.split('-', 1)
-            zone_a_name: str = zone_a_name.strip()
-            zone_b_name: str = zone_b_name.strip()
+        zone_a_name, zone_b_name = connection_part.split('-', 1)
+        zone_a_name: str = zone_a_name.strip()
+        zone_b_name: str = zone_b_name.strip()
 
-            if not zone_a_name or not zone_b_name:
-                raise ValueError(
-                    f"ERROR on line {n}: Invalid connection endpoints")
-            if zone_a_name == zone_b_name:
-                raise ValueError(
-                    f"ERROR on line {n}: Self-connection is not allowed")
+        if not zone_a_name or not zone_b_name:
+            raise ValueError(
+                f"ERROR on line {n}: Invalid connection endpoints")
+        if zone_a_name == zone_b_name:
+            raise ValueError(
+                f"ERROR on line {n}: Self-connection is not allowed")
 
-            zone_a: Optional[Zone] = self.zones.get(zone_a_name)
-            zone_b: Optional[Zone] = self.zones.get(zone_b_name)
+        zone_a: Optional[Zone] = self.zones.get(zone_a_name)
+        zone_b: Optional[Zone] = self.zones.get(zone_b_name)
 
-            if not zone_a or not zone_b:
-                raise ValueError(f"ERROR on line {n}: Unknown zone")
+        if not zone_a or not zone_b:
+            raise ValueError(f"ERROR on line {n}: Unknown zone")
 
-            normalized_key: str = '-'.join(sorted([zone_a_name, zone_b_name]))
-            if normalized_key in self.seen_connections:
-                raise ValueError(f"ERROR on line {n}: Duplicate connections")
+        normalized_key: str = '-'.join(sorted([zone_a_name, zone_b_name]))
+        if normalized_key in self.seen_connections:
+            raise ValueError(f"ERROR on line {n}: Duplicate connections")
 
-            metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
+        metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
 
-            max_link_capacity: int = metadata['max_link_capacity']
+        max_link_capacity: int = metadata['max_link_capacity']
 
-            connection: Connection = Connection(
-                zone_a,
-                zone_b,
-                max_link_capacity
-            )
+        connection: Connection = Connection(
+            zone_a,
+            zone_b,
+            max_link_capacity
+        )
 
-            self.connections.append(connection)
-            self.seen_connections.add(normalized_key)
+        self.connections.append(connection)
+        self.seen_connections.add(normalized_key)
 
     def _validate_final_result(self) -> None:
         if self.nb_drones <= 0:
