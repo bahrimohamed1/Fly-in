@@ -285,8 +285,8 @@ class Parser:
         # if self.start_zone.max_drones < self.nb_drones:
         #     raise ValueError("Invalid max_drones for start_hub")
         
-        if self.end_zone.max_drones < self.nb_drones:
-            raise ValueError("Invalid max_drones for end_hub")
+        # if self.end_zone.max_drones < self.nb_drones:
+        #     raise ValueError("Invalid max_drones for end_hub")
 
         if self.start_zone == self.end_zone:
             raise ValueError("start_hub and end_hub cannot be the same zone")

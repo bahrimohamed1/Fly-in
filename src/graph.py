@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple, Optional
 from . import Connection, Zone
 from collections import deque
-
+import heapq
 
 class Graph:
     def __init__(
@@ -83,3 +83,51 @@ class Graph:
                     queue.append(neighbor.name)
 
         return False
+
+    def get_distance(self, from_name: str, to_name: str) -> int | float:
+        """
+        Calculate the shortest path distance between two zones using Dijkstra.
+        Returns the minimum number of turns to travel from from_zone to to_zone.
+        Returns float('inf') if no path exists.
+        """
+        if from_name == to_name:
+            return 0
+
+        from_zone = self.get_zone(from_name)
+        to_zone = self.get_zone(to_name)
+
+        if from_zone is None or to_zone is None:
+            return float('inf')
+
+        # Dijkstra's algorithm
+        distances: Dict[str, int] = {from_name: 0}
+        heap: List[Tuple[int, str]] = [(0, from_name)]
+        visited: set[str] = set()
+
+        while heap:
+            current_dist, current_name = heapq.heappop(heap)
+
+            if current_name in visited:
+                continue
+            visited.add(current_name)
+
+            if current_name == to_name:
+                return current_dist
+
+            for neighbor_zone, _ in self.get_neighbors(current_name):
+                if neighbor_zone.zone_type == 'blocked':
+                    continue
+
+                # Movement cost depends on destination zone type
+                if neighbor_zone.zone_type == 'restricted':
+                    move_cost = 2
+                else:
+                    move_cost = 1
+
+                new_dist = current_dist + move_cost
+
+                if new_dist < distances.get(neighbor_zone.name, float('inf')):
+                    distances[neighbor_zone.name] = new_dist
+                    heapq.heappush(heap, (new_dist, neighbor_zone.name))
+
+        return float('inf')
