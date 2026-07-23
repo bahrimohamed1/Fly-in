@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 
 class Zone:
@@ -18,8 +18,8 @@ class Zone:
         name: str,
         x: int,
         y: int,
-        zone_type: str,
-        max_drones: int,
+        zone_type: Any,
+        max_drones: Any,
         color: Optional[str],
     ) -> None:
         self.name: str = name

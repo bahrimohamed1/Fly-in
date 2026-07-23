@@ -96,7 +96,7 @@ class Parser:
             if '=' not in item:
                 raise ValueError(f"ERROR on line {n}: INVALID METADATA ITEM")
             key: str | None = None
-            value: str | None = None
+            value: Any = None
             key, value = item.split('=', 1)
             if not key or not value:
                 raise ValueError(f"ERROR on line {n}: INVALID METADATA ITEM")
@@ -133,8 +133,8 @@ class Parser:
             raise ValueError(f"ERROR on line {n}: Invalid zone format")
 
         prefix, content = line.split(':', 1)
-        prefix: str = prefix.strip()
-        content: str = content.strip()
+        prefix = prefix.strip()
+        content = content.strip()
 
         if prefix not in ['start_hub', 'end_hub', 'hub']:
             raise ValueError(f"ERROR on line {n}: Invalid zone prefix")
@@ -148,7 +148,7 @@ class Parser:
 
             bracket_index: int = content.find('[')
             zone_part: str = content[:bracket_index]
-            metadata_txt: str = content[bracket_index:]
+            metadata_txt = content[bracket_index:]
 
         else:
             zone_part = content
@@ -207,8 +207,8 @@ class Parser:
             raise ValueError(f"ERROR on line {n}: Invalid connection format")
 
         prefix, content = line.split(':', 1)
-        prefix: str = prefix.strip()
-        content: str = content.strip()
+        prefix = prefix.strip()
+        content = content.strip()
 
         if prefix != 'connection':
             raise ValueError(f"ERROR on line {n}: Invalid connection prefix")
@@ -233,8 +233,8 @@ class Parser:
                 f"ERROR on line {n}: Connection must use A-B format")
 
         zone_a_name, zone_b_name = connection_part.split('-', 1)
-        zone_a_name: str = zone_a_name.strip()
-        zone_b_name: str = zone_b_name.strip()
+        zone_a_name = zone_a_name.strip()
+        zone_b_name = zone_b_name.strip()
 
         if not zone_a_name or not zone_b_name:
             raise ValueError(
@@ -281,12 +281,6 @@ class Parser:
 
         if not self.end_zone:
             raise ValueError("Missing end_zone")
-        
-        # if self.start_zone.max_drones < self.nb_drones:
-        #     raise ValueError("Invalid max_drones for start_hub")
-        
-        # if self.end_zone.max_drones < self.nb_drones:
-        #     raise ValueError("Invalid max_drones for end_hub")
 
         if self.start_zone == self.end_zone:
             raise ValueError("start_hub and end_hub cannot be the same zone")

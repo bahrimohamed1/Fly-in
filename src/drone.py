@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Any
 from .zone import Zone
 
 
@@ -9,9 +9,9 @@ class Drone:
 
     """
 
-    def __init__(self, drone_id: int, current_zone: Zone) -> None:
+    def __init__(self, drone_id: int, current_zone: Any) -> None:
         self.drone_id: int = drone_id
-        self.current_zone: Zone = current_zone
+        self.current_zone: Any = current_zone
         self.path: List[str] = []
         self.delivered: bool = False
 

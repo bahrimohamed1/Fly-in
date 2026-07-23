@@ -3,6 +3,7 @@ from . import Connection, Zone
 from collections import deque
 import heapq
 
+
 class Graph:
     def __init__(
         self,
@@ -87,7 +88,8 @@ class Graph:
     def get_distance(self, from_name: str, to_name: str) -> int | float:
         """
         Calculate the shortest path distance between two zones using Dijkstra.
-        Returns the minimum number of turns to travel from from_zone to to_zone.
+        Returns the minimum number of turns to travel,
+        from from_zone to to_zone.
         Returns float('inf') if no path exists.
         """
         if from_name == to_name:

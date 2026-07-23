@@ -1,9 +1,10 @@
 import sys
 import time
 from src import Parser, Scheduler, OutputBuilder, Validator
+from typing import Any
 
 
-def main():
+def main() -> Any:
     # Check command line arguments
     if len(sys.argv) < 2:
         print("Usage: python main.py <map_file>")
@@ -22,7 +23,7 @@ def main():
     try:
         parser = Parser(map_file)
         graph = parser.parse()
-        print(f"  ✅ Parsed successfully")
+        print("  ✅ Parsed successfully")
         print(f"     Drones: {parser.nb_drones}")
         print(f"     Zones: {len(graph.zones)}")
         print(f"     Connections: {len(graph.connections)}")
@@ -48,7 +49,9 @@ def main():
     print(f"  ✅ Shortest distance: {dist} turns")
 
     # ===== 4. Schedule drones =====
-    print(f"\n[4] Scheduling {parser.nb_drones} drones (max_turns={max_turns})...")
+    print(
+        f"\n[4] Scheduling {parser.nb_drones} "
+        f"drones (max_turns={max_turns})...")
     start_time = time.time()
     scheduler = Scheduler(graph)
 
@@ -121,8 +124,10 @@ def main():
     benchmarks = {
         "01_linear_path.txt": 6,
         "02_simple_fork.txt": 8,
+        "03_basic_capacity.txt": 6,
         "01_dead_end_trap.txt": 12,
         "02_circular_loop.txt": 15,
+        "03_priority_puzzle.txt": 12,
         "01_maze_nightmare.txt": 30,
         "02_capacity_hell.txt": 35,
         "03_ultimate_challenge.txt": 45,

@@ -34,7 +34,7 @@ class OutputBuilder:
             if turn in movement_by_turn:
                 line: str = " ".join(movement_by_turn[turn])
             else:
-                line: str = ""
+                line = ""
 
             output_lines.append(line)
 

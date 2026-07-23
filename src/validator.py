@@ -136,7 +136,9 @@ class Validator:
 
         return True
 
-    def validate_capacities(self, all_paths: Dict[int, List[PathStep]]) -> bool:
+    def validate_capacities(self,
+                            all_paths: Dict[int, List[PathStep]]
+                            ) -> bool:
         """
         Validates that all zone and connection capacities are respected
         at every turn according to the handover rule.
@@ -185,12 +187,14 @@ class Validator:
                             current_zone, next_zone)
                         if conn is None:
                             raise ValueError(
-                                f"No connection between {current_zone.name} and {next_zone.name}")
+                                f"No connection between {current_zone.name}"
+                                f"and {next_zone.name}")
                         conn_key = conn.key()
                         usage_turn = next_step.turn
                         if usage_turn not in conn_usage:
                             conn_usage[usage_turn] = {}
-                        conn_usage[usage_turn][conn_key] = conn_usage[usage_turn].get(
+                        conn_usage[usage_turn][conn_key] = conn_usage[
+                            usage_turn].get(
                             conn_key, 0) + 1
                     # Wait: no connection usage
                     i += 1
@@ -199,24 +203,28 @@ class Validator:
                     # Restricted move: connection used for two turns
                     if i + 2 >= len(path_steps):
                         raise ValueError(
-                            f"Drone {drone_id} restricted move missing arrival zone")
+                            f"Drone {drone_id} restricted move"
+                            "missing arrival zone")
                     arrival_step = path_steps[i + 2]
                     if arrival_step.kind != 'zone':
                         raise ValueError(
-                            f"Drone {drone_id} restricted move must end with zone")
+                            f"Drone {drone_id} "
+                            "restricted move must end with zone")
 
                     arrival_zone = self.graph.get_zone(arrival_step.name)
                     if arrival_zone is None:
                         raise ValueError(f"Zone {arrival_step.name} not found")
                     if arrival_zone.zone_type != 'restricted':
                         raise ValueError(
-                            f"Arrival zone {arrival_zone.name} is not restricted")
+                            f"Arrival zone {arrival_zone.name} "
+                            "is not restricted")
 
                     conn = self.graph.get_connection(
                         current_zone, arrival_zone)
                     if conn is None:
                         raise ValueError(
-                            f"No connection between {current_zone.name} and {arrival_zone.name}")
+                            f"No connection between {current_zone.name} "
+                            f"and {arrival_zone.name}")
                     conn_key = conn.key()
 
                     # Connection used in the two turns following the start
@@ -231,7 +239,8 @@ class Validator:
                     i += 2   # skip connection and arrival steps
                 else:
                     raise ValueError(
-                        f"Drone {drone_id} invalid step kind: {next_step.kind}")
+                        f"Drone {drone_id} invalid step kind: "
+                        f"{next_step.kind}")
 
         # 3. Validate zone capacities
         for turn, zones in zone_usage.items():
@@ -267,7 +276,8 @@ class Validator:
                     raise ValueError(f"Connection {conn_key} not found")
                 if count > conn.max_link_capacity:
                     raise ValueError(
-                        f"Connection {conn_key} capacity exceeded at turn {turn}: "
+                        f"Connection {conn_key} capacity exceeded "
+                        f"at turn {turn}: "
                         f"{count} > {conn.max_link_capacity}"
                     )
 

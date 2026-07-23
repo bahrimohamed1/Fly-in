@@ -1,12 +1,9 @@
 MAP = maps/easy/01_linear_path.txt
 
-# install:
-# 	pip install -r requirements.txt
-
 all: run
 
 run:
-	@python3 main.py
+	@python3 main.py $(MAP)
 
 debug:
 	python3 -m pdb main.py $(MAP)
@@ -22,13 +19,5 @@ lint:
 		--ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs
 
-lint-strict:
-	flake8 .
-	mypy . --strict
-
-# remove later (maybe)
 install:
 	pip install flake8 mypy pygame
-
-test:
-	python3 test_pygame.py

@@ -1,5 +1,5 @@
 from .zone import Zone
-from typing import List
+from typing import List, Any
 
 
 class Connection:
@@ -16,7 +16,7 @@ class Connection:
         self,
         zone1: Zone,
         zone2: Zone,
-        max_link_capacity: int = 1,
+        max_link_capacity: Any = 1,
     ) -> None:
         self.zone1: Zone = zone1
         self.zone2: Zone = zone2

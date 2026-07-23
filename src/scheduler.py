@@ -26,7 +26,8 @@ class Scheduler:
             try:
                 # Reset reservation table for each attempt
                 self.reservation_table = ReservationTable(self.graph)
-                self.pathfinder = PathFinder(self.graph, self.reservation_table)
+                self.pathfinder = PathFinder(
+                    self.graph, self.reservation_table)
 
                 return self._schedule_with_order(
                     start_zone, end_zone, order, max_turns
@@ -37,7 +38,8 @@ class Scheduler:
 
         # If all orders fail, try with increasing max_turns
         print("All orders failed, retrying with increased max_turns...")
-        return self._schedule_with_retry(start_zone, end_zone, nb_drones, max_turns)
+        return self._schedule_with_retry(
+            start_zone, end_zone, nb_drones, max_turns)
 
     def _generate_orders(self, nb_drones: int) -> List[List[int]]:
         """
@@ -126,6 +128,8 @@ class Scheduler:
 
         raise ValueError("No valid schedule found after multiple retries")
 
-    def _get_distance(self, drone_id: int, start_zone: Zone, end_zone: Zone) -> int | float:
+    def _get_distance(self,
+                      drone_id: int, start_zone: Zone, end_zone: Zone
+                      ) -> int | float:
         """Get shortest path distance for a drone (for sorting)."""
         return self.graph.get_distance(start_zone.name, end_zone.name)
