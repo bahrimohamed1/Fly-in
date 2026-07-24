@@ -59,6 +59,7 @@ class Graph:
         return None
 
     def has_path(self, start: Zone, end: Zone) -> bool:
+        """BFS"""
         if start.zone_type == 'blocked' or end.zone_type == 'blocked':
             return False
 
@@ -111,6 +112,7 @@ class Graph:
 
             if current_name in visited:
                 continue
+
             visited.add(current_name)
 
             if current_name == to_name:

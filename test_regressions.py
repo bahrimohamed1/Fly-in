@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from src import Parser, PathStep, Scheduler
+from src import Parser, PathStep, Scheduler, Graph
 
 
 class ParserConnectionMetadataTests(unittest.TestCase):
@@ -47,7 +47,7 @@ connection: start-goal [max_link_capacity=3]
 
 class SchedulerRetryProgressionTests(unittest.TestCase):
     @staticmethod
-    def _load_graph() -> object:
+    def _load_graph() -> Graph:
         parser = Parser("maps/easy/01_linear_path.txt")
         return parser.parse()
 
