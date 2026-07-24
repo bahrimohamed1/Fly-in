@@ -2,7 +2,7 @@ from .zone import Zone
 from .connection import Connection
 from .graph import Graph
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class Parser:
@@ -11,8 +11,8 @@ class Parser:
         self.nb_drones: int = 0
         self.zones: Dict[str, Zone] = {}
         self.connections: List[Connection] = []
-        self.start_zone: Zone | None = None
-        self.end_zone: Zone | None = None
+        self.start_zone: Optional[Zone] = None
+        self.end_zone: Optional[Zone] = None
         self.valid_zone_types: set[str] = {
             'normal', 'priority', 'restricted', 'blocked'}
         self.seen_connections: set[str] = set()
@@ -95,7 +95,7 @@ class Parser:
         for item in clean_metadata_txt.split():
             if '=' not in item:
                 raise ValueError(f"ERROR on line {n}: INVALID METADATA ITEM")
-            key: str | None = None
+            key: Optional[str] = None
             value: Any = None
             key, value = item.split('=', 1)
             if not key or not value:
@@ -125,6 +125,49 @@ class Parser:
 
             elif key == 'color':
                 metadata[key] = value
+
+        return metadata
+
+    def _parse_connection_metadata(self,
+                                   metadata_txt: str,
+                                   n: int) -> Dict[str, int]:
+        metadata: Dict[str, int] = {
+            'max_link_capacity': 1
+        }
+
+        clean_metadata_txt: str = metadata_txt.removeprefix(
+            '[').removesuffix(']').strip()
+        if not clean_metadata_txt:
+            return metadata
+
+        for item in clean_metadata_txt.split():
+            if '=' not in item:
+                raise ValueError(
+                    f"ERROR on line {n}: INVALID CONNECTION METADATA ITEM")
+
+            key: str
+            value: str
+            key, value = item.split('=', 1)
+
+            if not key or not value:
+                raise ValueError(
+                    f"ERROR on line {n}: INVALID CONNECTION METADATA ITEM")
+
+            if key != 'max_link_capacity':
+                raise ValueError(
+                    f"ERROR on line {n}: UNKNOWN CONNECTION METADATA KEY")
+
+            try:
+                capacity: int = int(value)
+            except ValueError:
+                raise ValueError(
+                    f"ERROR on line {n}: Metadata value must be integer")
+
+            if capacity <= 0:
+                raise ValueError(
+                    f"ERROR on line {n}: Metadata value must be positive")
+
+            metadata['max_link_capacity'] = capacity
 
         return metadata
 
@@ -175,7 +218,7 @@ class Parser:
         metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
         zone_type: str = metadata['zone']
         max_drones: int = metadata['max_drones']
-        color: str | None = metadata['color']
+        color: Optional[str] = metadata['color']
 
         zone: Zone = Zone(
             name,
@@ -243,8 +286,8 @@ class Parser:
             raise ValueError(
                 f"ERROR on line {n}: Self-connection is not allowed")
 
-        zone_a: Zone | None = self.zones.get(zone_a_name)
-        zone_b: Zone | None = self.zones.get(zone_b_name)
+        zone_a: Optional[Zone] = self.zones.get(zone_a_name)
+        zone_b: Optional[Zone] = self.zones.get(zone_b_name)
 
         if not zone_a or not zone_b:
             raise ValueError(f"ERROR on line {n}: Unknown zone")
@@ -253,7 +296,8 @@ class Parser:
         if normalized_key in self.seen_connections:
             raise ValueError(f"ERROR on line {n}: Duplicate connections")
 
-        metadata: Dict[str, Any] = self._parse_metadata(metadata_txt, n)
+        metadata: Dict[str, int] = self._parse_connection_metadata(
+            metadata_txt, n)
 
         max_link_capacity: int = metadata['max_link_capacity']
 
