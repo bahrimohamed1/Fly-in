@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from . import PathStep, Zone
 
@@ -7,23 +7,16 @@ class SearchState:
     """
     Represent one state explored by the pathfinding algorithm.
 
-    Attributes:
-        zone:
-            Zone currently occupied by the drone.
+    A search state stores:
 
-        turn:
-            Turn at which the drone occupies the zone.
+    - the zone currently occupied by the drone;
+    - the turn at which the drone occupies that zone;
+    - the complete sequence of path steps used to reach the state;
+    - the number of priority zones entered along the path.
 
-        path_steps:
-            Complete sequence of path steps used to reach this state.
-
-        priority_penalty:
-            Number of times the path ignored a forward priority option.
-
-        previous_zone_name:
-            Name of the zone occupied immediately before the current zone.
-            It is used to prevent the edge leading backward from being
-            interpreted as a new priority diversion.
+    The priority count is used only as a tie-breaker between paths that
+    reach the same location at the same turn. A higher priority count
+    indicates that the path follows more preferred zones.
     """
 
     def __init__(
@@ -31,39 +24,36 @@ class SearchState:
         zone: Zone,
         turn: int,
         path_steps: List[PathStep],
-        priority_penalty: int = 0,
-        previous_zone_name: Optional[str] = None,
+        priority_count: int = 0,
     ) -> None:
         """
         Initialize a search state.
 
         Args:
             zone:
-                Current zone.
+                Zone currently occupied by the drone.
 
             turn:
-                Current arrival turn.
+                Turn at which the drone occupies ``zone``.
 
             path_steps:
-                Steps used to reach the current state.
+                Complete sequence of path steps used to reach this state.
 
-            priority_penalty:
-                Number of ignored forward priority choices.
-
-            previous_zone_name:
-                Zone occupied before entering the current zone. ``None``
-                is used for the initial state.
+            priority_count:
+                Number of priority zones entered while following this path.
+                This value is used only to break ties between equally fast
+                paths. A larger value represents a path that uses more
+                preferred zones.
 
         Raises:
             ValueError:
-                If the turn or priority penalty is negative, or if the
-                path contains no steps.
+                If ``turn`` is negative, ``path_steps`` is empty, or
+                ``priority_count`` is negative.
         """
         self.zone: Zone = zone
         self.turn: int = turn
         self.path_steps: List[PathStep] = path_steps
-        self.priority_penalty: int = priority_penalty
-        self.previous_zone_name: Optional[str] = previous_zone_name
+        self.priority_count: int = priority_count
 
         if self.turn < 0:
             raise ValueError(
@@ -75,7 +65,7 @@ class SearchState:
                 "Path steps can't be empty"
             )
 
-        if self.priority_penalty < 0:
+        if self.priority_count < 0:
             raise ValueError(
-                "Priority penalty can't be negative"
+                "Priority count can't be negative"
             )

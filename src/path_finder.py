@@ -51,33 +51,16 @@ class PathFinder:
         max_turns: int,
     ) -> Optional[List[PathStep]]:
         """
-        Find a valid route from ``start_zone`` to ``end_zone``.
+        Find the earliest valid path.
 
-        Priority zones are preferred, but they are not mandatory.
+        Priority zones are used only as a tie-breaker. A longer path through
+        priority zones never beats a shorter path.
 
-        When a drone has a forward priority option, choosing a non-priority
-        neighbor adds one priority penalty. The zone the drone just came from
-        is ignored when detecting priority diversions because moving backward
-        is not considered a new route choice.
+        Path ordering:
 
-        Paths are ordered by:
-
-        1. Lowest accumulated priority penalty.
-        2. Lowest arrival turn.
-        3. Insertion order for deterministic behaviour.
-
-        Args:
-            start_zone:
-                Zone from which the drone starts.
-
-            end_zone:
-                Destination zone.
-
-            max_turns:
-                Maximum allowed arrival turn.
-
-        Returns:
-            The path steps when a valid route is found, otherwise ``None``.
+        1. Earliest arrival turn.
+        2. Highest number of entered priority zones.
+        3. Insertion order.
         """
         start_step = PathStep(
             0,
@@ -89,17 +72,16 @@ class PathFinder:
             start_zone,
             0,
             [start_step],
-            priority_penalty=0,
-            previous_zone_name=None,
+            priority_count=0,
         )
 
-        # Queue entries contain:
+        # Queue entry:
         #
         # (
-        #     accumulated priority penalty,
         #     arrival turn,
+        #     negative priority count,
         #     insertion counter,
-        #     search state,
+        #     state,
         # )
         queue: List[
             Tuple[int, int, int, SearchState]
@@ -117,21 +99,17 @@ class PathFinder:
             ),
         )
 
-        # For the same zone, turn, and previous zone, retain only the
-        # smallest priority penalty encountered.
-        #
-        # previous_zone_name must be part of the key because priority
-        # diversion detection depends on the direction from which the
-        # current zone was entered.
-        best_penalty: Dict[
-            Tuple[str, int, Optional[str]],
+        # For the same zone and turn, retain the path that entered the
+        # greatest number of priority zones.
+        best_priority: Dict[
+            Tuple[str, int],
             int,
         ] = {}
 
         while queue:
             (
-                queued_penalty,
                 _,
+                queued_negative_priority,
                 _,
                 current_state,
             ) = heapq.heappop(queue)
@@ -139,32 +117,29 @@ class PathFinder:
             current_zone = current_state.zone
             current_turn = current_state.turn
             current_path = current_state.path_steps
-            current_penalty = current_state.priority_penalty
-            previous_zone_name = current_state.previous_zone_name
+            current_priority_count = current_state.priority_count
 
-            # Ignore inconsistent or outdated queue entries.
-            if queued_penalty != current_penalty:
+            if (
+                queued_negative_priority
+                != -current_priority_count
+            ):
                 continue
 
             state_key = (
                 current_zone.name,
                 current_turn,
-                previous_zone_name,
             )
 
-            previous_best = best_penalty.get(state_key)
+            previous_best = best_priority.get(state_key)
 
             if (
                 previous_best is not None
-                and previous_best <= current_penalty
+                and previous_best >= current_priority_count
             ):
                 continue
 
-            best_penalty[state_key] = current_penalty
+            best_priority[state_key] = current_priority_count
 
-            # Because the queue prioritizes penalty before turn count,
-            # the first destination removed from the queue is the best
-            # priority-respecting route available.
             if current_zone == end_zone:
                 return current_path
 
@@ -175,69 +150,16 @@ class PathFinder:
                 current_zone.name
             )
 
-            # Blocked zones can never be entered.
-            passable_neighbors = [
-                (neighbor_zone, connection)
-                for neighbor_zone, connection in neighbors
-                if neighbor_zone.zone_type != "blocked"
-            ]
+            for neighbor_zone, connection in neighbors:
+                if neighbor_zone.zone_type == "blocked":
+                    continue
 
-            # Exclude the zone the drone just came from when deciding whether
-            # the current position contains a priority diversion.
-            #
-            # Example:
-            #
-            # priority_A -> priority_B -> goal
-            #
-            # At priority_B, priority_A is behind the drone. It must not cause
-            # the move to goal to be treated as ignoring a priority option.
-            forward_neighbors = [
-                (neighbor_zone, connection)
-                for neighbor_zone, connection in passable_neighbors
-                if neighbor_zone.name != previous_zone_name
-            ]
+                new_priority_count = current_priority_count
 
-            has_forward_priority_exit = any(
-                neighbor_zone.zone_type == "priority"
-                for neighbor_zone, _ in forward_neighbors
-            )
-
-            # Explore every passable neighbor.
-            #
-            # Priority is preferred through the penalty system, but normal and
-            # restricted routes remain available as fallback paths.
-            for neighbor_zone, connection in passable_neighbors:
-                is_backtracking = (
-                    neighbor_zone.name == previous_zone_name
-                )
-
-                # A penalty is added only when:
-                #
-                # 1. a forward priority exit exists;
-                # 2. the selected movement is not backtracking;
-                # 3. the selected destination is not a priority zone.
-                #
-                # Backtracking remains available without being interpreted as
-                # deliberately selecting a competing forward branch.
-                ignores_priority = (
-                    has_forward_priority_exit
-                    and not is_backtracking
-                    and neighbor_zone.zone_type != "priority"
-                )
-
-                move_penalty = (
-                    1 if ignores_priority else 0
-                )
-
-                new_penalty = (
-                    current_penalty + move_penalty
-                )
+                if neighbor_zone.zone_type == "priority":
+                    new_priority_count += 1
 
                 if neighbor_zone.zone_type == "restricted":
-                    # Entering a restricted zone takes two turns:
-                    #
-                    # turn + 1: the drone occupies the connection;
-                    # turn + 2: the drone arrives in the restricted zone.
                     connection_turn = current_turn + 1
                     arrival_turn = current_turn + 2
 
@@ -272,7 +194,6 @@ class PathFinder:
                     ]
 
                 else:
-                    # Normal and priority zones both take one turn to enter.
                     arrival_turn = current_turn + 1
 
                     if arrival_turn > max_turns:
@@ -302,8 +223,7 @@ class PathFinder:
                     neighbor_zone,
                     arrival_turn,
                     new_path,
-                    priority_penalty=new_penalty,
-                    previous_zone_name=current_zone.name,
+                    priority_count=new_priority_count,
                 )
 
                 counter += 1
@@ -311,14 +231,13 @@ class PathFinder:
                 heapq.heappush(
                     queue,
                     (
-                        new_penalty,
                         arrival_turn,
+                        -new_priority_count,
                         counter,
                         new_state,
                     ),
                 )
 
-            # Waiting is allowed when the reservation table permits it.
             wait_turn = current_turn + 1
 
             if (
@@ -338,15 +257,11 @@ class PathFinder:
                     wait_step,
                 ]
 
-                # Waiting does not select a competing route, so it does not
-                # increase the priority penalty. The previous zone remains
-                # unchanged because the drone did not move.
                 new_state = SearchState(
                     current_zone,
                     wait_turn,
                     new_path,
-                    priority_penalty=current_penalty,
-                    previous_zone_name=previous_zone_name,
+                    priority_count=current_priority_count,
                 )
 
                 counter += 1
@@ -354,8 +269,8 @@ class PathFinder:
                 heapq.heappush(
                     queue,
                     (
-                        current_penalty,
                         wait_turn,
+                        -current_priority_count,
                         counter,
                         new_state,
                     ),
