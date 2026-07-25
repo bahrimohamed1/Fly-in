@@ -66,7 +66,8 @@ class SchedulerRetryProgressionTests(unittest.TestCase):
         return parser.parse()
 
     def test_retry_increases_turn_budget_until_limit(self) -> None:
-        """The scheduler must retry with larger turn budgets until its limit."""
+        """The scheduler must retry with
+        larger turn budgets until its limit."""
         graph = self._load_graph()
         scheduler = Scheduler(graph)
         orders = [[1], [2]]
@@ -247,6 +248,7 @@ connection: priority_b-goal
             self._zone_names(path),
             ["start", "priority_a", "priority_b", "goal"],
         )
+
     def test_priority_diversion_beats_shorter_normal_route(self) -> None:
         """
         A priority exit must be selected even when the normal route is shorter.
@@ -277,6 +279,7 @@ connection: priority_b-goal
                 "goal",
             ],
         )
+
 
 if __name__ == "__main__":
     unittest.main()
