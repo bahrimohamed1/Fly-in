@@ -1,4 +1,4 @@
-MAP = maps/easy/01_linear_path.txt
+MAP = maps/custom/01_priority_test.txt
 
 all: run
 
