@@ -6,7 +6,38 @@ from typing import List, Dict, Any, Optional
 
 
 class Parser:
+    """
+    Parses map files for the Fly-in Drones simulation.
+
+    The parser reads and validates map files in the format specified in the subject.
+    It handles zone definitions (start_hub, end_hub, hub), connections, metadata,
+    and performs extensive validation to ensure the map is valid.
+
+    Map file format:
+        - nb_drones: <positive_integer>
+        - start_hub: <name> <x> <y> [metadata]
+        - end_hub: <name> <x> <y> [metadata]
+        - hub: <name> <x> <y> [metadata]
+        - connection: <name1>-<name2> [metadata]
+
+    Supported metadata:
+        - zone: normal | priority | restricted | blocked (default: normal)
+        - color: <string> (default: None)
+        - max_drones: <positive_integer> (default: 1)
+        - max_link_capacity: <positive_integer> (default: 1)
+
+    Raises:
+        ValueError: On any parsing or validation error.
+        FileNotFoundError: If the map file does not exist.
+    """
+
     def __init__(self, map_file: str) -> None:
+        """
+        Initialize the parser with a map file path.
+
+        Args:
+            map_file: Path to the map file to parse.
+        """
         self.map: str = map_file
         self.nb_drones: int = 0
         self.zones: Dict[str, Zone] = {}
@@ -18,6 +49,20 @@ class Parser:
         self.seen_connections: set[str] = set()
 
     def parse(self) -> Graph:
+        """
+        Parse the map file and build a Graph object.
+
+        Reads the map file line by line, parsing zone definitions,
+        connections, and metadata. Validates the graph structure
+        and ensures a path exists from start to end.
+
+        Returns:
+            Graph: A fully constructed Graph object ready for scheduling.
+
+        Raises:
+            ValueError: If the map file is malformed or invalid.
+            FileNotFoundError: If the map file does not exist.
+        """
         with open(self.map, 'r') as file:
             for n, raw_line in enumerate(file, 1):
                 line = raw_line.strip()
@@ -57,6 +102,16 @@ class Parser:
             return graph
 
     def _parse_nb_drones(self, line: str, n: int) -> None:
+        """
+        Parse the nb_drones line.
+
+        Args:
+            line: The raw line from the file.
+            n: The line number (for error reporting).
+
+        Raises:
+            ValueError: If the format is invalid or the value is not a positive integer.
+        """
         if self.nb_drones:
             raise ValueError(
                 f"ERROR on line {n}: NB_DRONES DEFINED MULTIPLE TIMES")
@@ -80,6 +135,25 @@ class Parser:
         self.nb_drones = value
 
     def _parse_metadata(self, metadata_txt: str, n: int) -> Dict[str, Any]:
+        """
+        Parse zone metadata from a metadata string.
+
+        Supports:
+            - zone=<type>
+            - color=<value>
+            - max_drones=<integer>
+
+        Args:
+            metadata_txt: The metadata string (including brackets).
+            n: The line number (for error reporting).
+
+        Returns:
+            Dict[str, Any]: A dictionary of parsed metadata values.
+                Keys: 'zone', 'color', 'max_drones'
+
+        Raises:
+            ValueError: If the metadata is malformed or contains invalid values.
+        """
         metadata: Dict[str, Any] = {
             'zone': 'normal',
             'color': None,
@@ -131,6 +205,22 @@ class Parser:
     def _parse_connection_metadata(self,
                                    metadata_txt: str,
                                    n: int) -> Dict[str, int]:
+        """
+        Parse connection metadata from a metadata string.
+
+        Supports:
+            - max_link_capacity=<integer>
+
+        Args:
+            metadata_txt: The metadata string (including brackets).
+            n: The line number (for error reporting).
+
+        Returns:
+            Dict[str, int]: A dictionary with 'max_link_capacity' key.
+
+        Raises:
+            ValueError: If the metadata is malformed or contains invalid values.
+        """
         metadata: Dict[str, int] = {
             'max_link_capacity': 1
         }
@@ -172,6 +262,18 @@ class Parser:
         return metadata
 
     def _parse_zone_line(self, line: str, n: int) -> None:
+        """
+        Parse a zone definition line (start_hub, end_hub, or hub).
+
+        Format: <prefix>: <name> <x> <y> [metadata]
+
+        Args:
+            line: The raw line from the file.
+            n: The line number (for error reporting).
+
+        Raises:
+            ValueError: If the zone definition is malformed or invalid.
+        """
         if ':' not in line:
             raise ValueError(f"ERROR on line {n}: Invalid zone format")
 
@@ -246,6 +348,18 @@ class Parser:
             self.end_zone = zone
 
     def _parse_connection_line(self, line: str, n: int) -> None:
+        """
+        Parse a connection definition line.
+
+        Format: connection: <zone1>-<zone2> [metadata]
+
+        Args:
+            line: The raw line from the file.
+            n: The line number (for error reporting).
+
+        Raises:
+            ValueError: If the connection definition is malformed or invalid.
+        """
         if ':' not in line:
             raise ValueError(f"ERROR on line {n}: Invalid connection format")
 
@@ -311,6 +425,19 @@ class Parser:
         self.seen_connections.add(normalized_key)
 
     def _validate_final_result(self) -> None:
+        """
+        Validate the final parsed result.
+
+        Checks:
+            - nb_drones is set and positive
+            - At least one zone and one connection exist
+            - start_zone and end_zone are defined
+            - start_zone and end_zone are not the same
+            - start_zone and end_zone are not blocked
+
+        Raises:
+            ValueError: If any validation check fails.
+        """
         if self.nb_drones <= 0:
             raise ValueError("Missing or invalid nb_drones")
 
