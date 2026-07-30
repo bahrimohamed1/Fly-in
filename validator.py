@@ -1,4 +1,8 @@
-from . import Graph, PathStep, Zone, Connection
+from graph import Graph
+from path_step import PathStep
+from connection import Connection
+from zone import Zone
+
 from typing import Dict, List, Optional
 
 

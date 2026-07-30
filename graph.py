@@ -4,8 +4,10 @@ This module defines the Graph class representing the drone network topology,
 including zones, connections, and pathfinding utilities.
 """
 
+from connection import Connection
+from zone import Zone
+
 from typing import Dict, List, Tuple, Optional
-from . import Connection, Zone
 from collections import deque
 import heapq
 

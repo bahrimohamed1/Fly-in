@@ -1,4 +1,4 @@
-MAP = maps/custom/01_priority_test.txt
+MAP = maps/challenger/01_the_impossible_dream.txt
 
 all: run
 
@@ -9,9 +9,9 @@ debug:
 	python3 -m pdb main.py $(MAP)
 
 clean:
-	rm -rf __pycache__ src/__pycache__
+	rm -rf __pycache__
 	rm -rf env .venv
-	rm -rf .mypy_cache src/.mypy_cache
+	rm -rf .mypy_cache
 
 lint:
 	flake8 --exclude=env .

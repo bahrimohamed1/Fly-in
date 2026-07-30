@@ -1,6 +1,10 @@
+from parser import Parser
+from scheduler import Scheduler
+from validator import Validator
+from output_builder import OutputBuilder
+
 import sys
 import time
-from src import Parser, Scheduler, OutputBuilder, Validator
 from typing import Any
 
 
@@ -97,16 +101,8 @@ def main() -> Any:
     print("OUTPUT:")
     print("=" * 60)
 
-    # Print first 20 lines (or all if <= 20)
-    if len(output_lines) <= 20:
-        for line in output_lines:
-            print(line)
-    else:
-        for i, line in enumerate(output_lines[:10]):
-            print(line)
-        print("  ...")
-        for line in output_lines[-5:]:
-            print(line)
+    for line in output_lines:
+        print(line)
 
     print("=" * 60)
 
@@ -131,7 +127,6 @@ def main() -> Any:
         "01_maze_nightmare.txt": 30,
         "02_capacity_hell.txt": 35,
         "03_ultimate_challenge.txt": 45,
-        "impossible_dream.txt": 45,
     }
 
     # Get benchmark for current map

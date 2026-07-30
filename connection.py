@@ -4,7 +4,8 @@ This module defines the Connection class representing a bidirectional
 edge between two zones in the drone network graph.
 """
 
-from .zone import Zone
+from zone import Zone
+
 from typing import List, Any
 
 

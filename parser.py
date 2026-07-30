@@ -1,6 +1,6 @@
-from .zone import Zone
-from .connection import Connection
-from .graph import Graph
+from zone import Zone
+from connection import Connection
+from graph import Graph
 
 from typing import List, Dict, Any, Optional
 

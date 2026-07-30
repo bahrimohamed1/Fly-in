@@ -1,6 +1,7 @@
 from typing import List
 
-from . import PathStep, Zone
+from path_step import PathStep
+from zone import Zone
 
 
 class SearchState:

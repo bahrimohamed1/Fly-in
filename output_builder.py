@@ -1,4 +1,5 @@
-from . import PathStep
+from path_step import PathStep
+
 from typing import Dict, List
 
 

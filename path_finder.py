@@ -1,7 +1,11 @@
 import heapq
 from typing import Dict, List, Optional, Tuple
 
-from . import Graph, PathStep, ReservationTable, SearchState, Zone
+from graph import Graph
+from path_step import PathStep
+from reservation_table import ReservationTable 
+from search_state import SearchState
+from zone import Zone
 
 
 class PathFinder:
