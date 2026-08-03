@@ -22,4 +22,4 @@ lint:
 		--check-untyped-defs
 
 install:
-	pip install flake8 mypy pygame
+	pip install -r requirements.txt

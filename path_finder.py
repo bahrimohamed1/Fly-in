@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 from graph import Graph
 from path_step import PathStep
-from reservation_table import ReservationTable 
+from reservation_table import ReservationTable
 from search_state import SearchState
 from zone import Zone
 

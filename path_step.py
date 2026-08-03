@@ -66,7 +66,8 @@ class PathStep:
         Returns:
             str: A string in the format "(turn, kind, name)".
         """
-        return f"PathStep(turn={self.turn}, kind='{self.kind}', name='{self.name}')"
+        return (f"PathStep(turn={self.turn}, kind='{self.kind}',"
+                f"name='{self.name}')")
 
     def __str__(self) -> str:
         """

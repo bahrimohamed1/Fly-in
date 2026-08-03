@@ -9,8 +9,10 @@ class Parser:
     """
     Parses map files for the Fly-in Drones simulation.
 
-    The parser reads and validates map files in the format specified in the subject.
-    It handles zone definitions (start_hub, end_hub, hub), connections, metadata,
+    The parser reads and validates map files in the format
+        specified in the subject.
+    It handles zone definitions (start_hub, end_hub, hub),
+        connections, metadata,
     and performs extensive validation to ensure the map is valid.
 
     Map file format:
@@ -110,7 +112,8 @@ class Parser:
             n: The line number (for error reporting).
 
         Raises:
-            ValueError: If the format is invalid or the value is not a positive integer.
+            ValueError: If the format is invalid or the value is not
+                a positive integer.
         """
         if self.nb_drones:
             raise ValueError(
@@ -152,7 +155,8 @@ class Parser:
                 Keys: 'zone', 'color', 'max_drones'
 
         Raises:
-            ValueError: If the metadata is malformed or contains invalid values.
+            ValueError: If the metadata is malformed or contains
+                invalid values.
         """
         metadata: Dict[str, Any] = {
             'zone': 'normal',
@@ -219,7 +223,8 @@ class Parser:
             Dict[str, int]: A dictionary with 'max_link_capacity' key.
 
         Raises:
-            ValueError: If the metadata is malformed or contains invalid values.
+            ValueError: If the metadata is malformed or contains
+                invalid values.
         """
         metadata: Dict[str, int] = {
             'max_link_capacity': 1
