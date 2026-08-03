@@ -12,6 +12,8 @@ clean:
 	rm -rf __pycache__
 	rm -rf env .venv
 	rm -rf .mypy_cache
+	rm -rf src
+	rm -rf tests
 
 lint:
 	flake8 --exclude=env .
