@@ -6,6 +6,7 @@
 
 # Table of Contents
 
+- [Visual Representation](#visual-representation)
 - [How Fly-in Works](#how-fly-in-works)
 - [Project Objectives](#project-objectives)
 - [Key Features](#key-features)
@@ -22,6 +23,70 @@
 - [Compilation & Execution](#compilation--execution)
 - [Resources](#resources)
 - [AI Usage](#ai-usage)
+
+---
+
+# Visual Representation
+
+Fly-in includes a colored terminal output to make the simulation easier to follow.
+
+Every movement is displayed with a distinct color, depending on the resource involved.
+
+*Zone colors*
+
+Zones use the color specified in the map metadata.
+
+*Example:*
+
+```text
+start_hub: start 0 0 [color=green]
+hub: gate_hell1 1 0 [color=red]
+hub: maze_trap_a1 2 1 [color=purple]
+The terminal output automatically displays each zone in its corresponding color.
+```
+
+If no color is specified in the metadata, a default color is used based on the zone type.
+
+*Zone type*	    *Default color*
+**Normal**	       **White**
+**Priority**	   **Green**
+**Restricted**	   **Red**
+**Blocked**	       **Gray**
+**Connection**     **colors**
+
+*Connection colors*
+
+Connections use a separate default color (yellow) to distinguish them from zones.
+
+*Drone colors*
+
+Drones are also displayed with distinct colors.
+
+Drone identifiers cycle through a predefined set of colors:
+
+```text
+Red, Green, Blue, Yellow, Purple, Cyan, ...
+This makes it easy to track individual drones across multiple turns.
+```
+
+*Why visual feedback helps*
+
+Benefit	Explanation
+Faster debugging	Zone occupancy issues become immediately visible
+Better understanding	You can see which routes are congested at a glance
+Improved evaluation	Peer reviewers can quickly verify correctness
+Colors are only applied to the terminal output.
+
+The underlying data format remains unchanged.
+
+*Example of colored output:*
+
+```text
+D1-gate_hell1
+D1-maze_trap_a1 D2-gate_hell1
+D1-micro_gate1 D2-maze_trap_a1 D3-gate_hell1
+Each drone and each resource is displayed with a unique colour, making the schedule significantly easier to interpret.
+```
 
 ---
 
@@ -184,11 +249,6 @@ Each class has a single responsibility.
                         ▼
                  ┌──────────────┐
                  │  Scheduler   │
-                 └──────────────┘
-                        │
-                        ▼
-                 ┌──────────────┐
-                 │  Validator   │
                  └──────────────┘
 ```
 
