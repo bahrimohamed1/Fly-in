@@ -3,7 +3,6 @@ from scheduler import Scheduler
 from output_builder import OutputBuilder
 
 import sys
-import time
 from typing import Any
 
 
@@ -25,7 +24,7 @@ def main() -> Any:
     except Exception as e:
         print(f"  ❌ Parse error: {e}")
         sys.exit(1)
-        
+
     # ===== 2. Get shortest path distance =====
     dist = graph.get_distance(graph.start_zone.name, graph.end_zone.name)
     if dist == float('inf'):
@@ -55,7 +54,7 @@ def main() -> Any:
         sys.exit(1)
 
     # ===== 4. Generate output =====
-    output_builder = OutputBuilder()
+    output_builder = OutputBuilder(graph)
     output_lines = output_builder.build_output(all_paths)
 
     for line in output_lines:
