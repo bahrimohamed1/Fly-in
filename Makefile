@@ -1,25 +1,26 @@
-MAP = maps/easy/01_linear_path.txt
+MAP = maps/challenger/01_the_impossible_dream.txt
 
-# install:
-# 	pip install -r requirements.txt
+all: run
 
 run:
-	@python3 main.py
+	@python3 main.py $(MAP)
 
 debug:
 	python3 -m pdb main.py $(MAP)
 
 clean:
-	rm -rf __pycache__ src/__pycache__
+	rm -rf __pycache__
 	rm -rf env .venv
-	rm -rf .mypy_cache src/.mypy_cache
+	rm -rf .mypy_cache
+	rm -rf src
+	rm -rf tests
 
 lint:
-	flake8 .
+	flake8 --exclude=env .
 	mypy . --warn-return-any --warn-unused-ignores \
 		--ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs
 
-lint-strict:
-	flake8 .
-	numpy . --strict
+install:
+	pip install --upgrade pip
+	pip install -r requirements.txt
