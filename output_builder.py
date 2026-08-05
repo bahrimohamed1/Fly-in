@@ -37,8 +37,7 @@ class OutputBuilder:
     MAROON = '\033[31m'
     VIOLET = '\033[95m'
     CRIMSON = '\033[91m'
-    ORANGE = '\033[91m'
-    RAINBOW = '\033[96m'  # just cyan for simplicity
+    ORANGE = '\033[38;5;208m'
 
     # Default colors
     DEFAULT_ZONE_COLOR = WHITE
@@ -69,7 +68,6 @@ class OutputBuilder:
         'violet': VIOLET,
         'crimson': CRIMSON,
         'orange': ORANGE,
-        'rainbow': RAINBOW,
         'darkred': DARK_RED,
     }
 
