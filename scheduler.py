@@ -110,8 +110,6 @@ class Scheduler:
         orders = self._generate_orders(nb_drones)
 
         for order in orders:
-            print(f"Trying order: {order}")
-
             try:
                 # Every order must begin with no existing reservations.
                 self.reservation_table = ReservationTable(self.graph)
@@ -133,10 +131,6 @@ class Scheduler:
                 continue
 
         # None of the generated orders worked with the original turn limit.
-        print(
-            "All orders failed, retrying with increased max_turns..."
-        )
-
         return self._schedule_with_retry(
             start_zone,
             end_zone,
